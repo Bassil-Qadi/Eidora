@@ -1,0 +1,503 @@
+.islamic-animation-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  min-height: 400px;
+  max-width: 500px;
+  max-height: 500px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 50%;
+}
+
+/* Central Crescent Moon and Star */
+.crescent-star-group {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  animation: groupFloat 8s ease-in-out infinite;
+}
+
+.crescent-moon {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+}
+
+.crescent-moon::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f4d03f 0%, #f7dc6f 50%, #d4af37 100%);
+  box-shadow: 0 0 40px rgba(244, 208, 63, 0.7),
+              inset -25px 0 0 rgba(0, 0, 0, 0.2);
+  animation: moonGlow 4s ease-in-out infinite;
+}
+
+.crescent-moon-inner {
+  position: absolute;
+  width: 75%;
+  height: 75%;
+  top: 12.5%;
+  left: 12.5%;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset -8px 0 15px rgba(0, 0, 0, 0.4);
+}
+
+.islamic-star {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 30px;
+  background: #fff;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+  animation: starTwinkle 2s ease-in-out infinite;
+  margin-top: 70px;
+}
+
+@keyframes groupFloat {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-10px);
+  }
+}
+
+@keyframes moonGlow {
+  0%, 100% {
+    box-shadow: 0 0 40px rgba(244, 208, 63, 0.7),
+                inset -25px 0 0 rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(244, 208, 63, 1),
+                inset -25px 0 0 rgba(0, 0, 0, 0.2);
+  }
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+/* Ramadan Lanterns */
+.lantern {
+  position: absolute;
+  width: 50px;
+  height: 70px;
+  z-index: 3;
+  animation: lanternSway 6s ease-in-out infinite;
+}
+
+.lantern-1 {
+  top: 15%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.lantern-2 {
+  top: 15%;
+  right: 20%;
+  animation-delay: 3s;
+}
+
+.lantern-top {
+  width: 30px;
+  height: 8px;
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+  border-radius: 4px 4px 0 0;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+}
+
+.lantern-body {
+  width: 100%;
+  height: 55px;
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
+  border-radius: 8px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.5),
+              inset 0 0 20px rgba(244, 208, 63, 0.3);
+  overflow: hidden;
+}
+
+.lantern-pattern {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(0, 0, 0, 0.1) 8px, rgba(0, 0, 0, 0.1) 10px);
+  opacity: 0.5;
+}
+
+.lantern-light {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 35px;
+  height: 35px;
+  background: radial-gradient(circle, rgba(244, 208, 63, 0.9) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: lightFlicker 2.5s ease-in-out infinite;
+}
+
+.lantern-bottom {
+  width: 20px;
+  height: 6px;
+  background: #d4af37;
+  border-radius: 0 0 3px 3px;
+  margin: 0 auto;
+  box-shadow: 0 2px 5px rgba(212, 175, 55, 0.3);
+}
+
+@keyframes lanternSway {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(-2deg);
+  }
+}
+
+@keyframes lightFlicker {
+  0%, 100% {
+    opacity: 0.7;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
+/* Dates */
+.date {
+  position: absolute;
+  z-index: 2;
+  animation: dateFloat 5s ease-in-out infinite;
+}
+
+.date-1 {
+  bottom: 20%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.date-2 {
+  bottom: 25%;
+  right: 18%;
+  animation-delay: 1.5s;
+}
+
+.date-3 {
+  bottom: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 3s;
+}
+
+.date-body {
+  width: 20px;
+  height: 28px;
+  background: linear-gradient(135deg, #8b4513 0%, #a0522d 50%, #8b4513 100%);
+  border-radius: 10px 10px 5px 5px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.4),
+              inset 0 -5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.date-body::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 1px;
+}
+
+.date-stem {
+  width: 2px;
+  height: 8px;
+  background: #654321;
+  margin: 0 auto;
+  border-radius: 1px 1px 0 0;
+}
+
+@keyframes dateFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-12px) translateX(5px);
+  }
+}
+
+/* Prayer Beads (Tasbih) */
+.tasbih {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 4px;
+  z-index: 1;
+  animation: tasbihSway 7s ease-in-out infinite;
+}
+
+.bead {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(212, 175, 55, 0.5),
+              inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  animation: beadPulse 2s ease-in-out infinite;
+}
+
+.bead-1 { left: 0%; animation-delay: 0s; }
+.bead-2 { left: 11%; animation-delay: 0.2s; }
+.bead-3 { left: 22%; animation-delay: 0.4s; }
+.bead-4 { left: 33%; animation-delay: 0.6s; }
+.bead-5 { left: 44%; animation-delay: 0.8s; }
+.bead-6 { left: 56%; animation-delay: 1s; }
+.bead-7 { left: 67%; animation-delay: 1.2s; }
+.bead-8 { left: 78%; animation-delay: 1.4s; }
+.bead-9 { left: 89%; animation-delay: 1.6s; }
+.bead-10 { left: 100%; animation-delay: 1.8s; }
+
+@keyframes tasbihSway {
+  0%, 100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(5deg);
+  }
+}
+
+@keyframes beadPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+/* Geometric Islamic Pattern */
+.geometric-pattern {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  z-index: 0;
+  opacity: 0.15;
+}
+
+.pattern-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(212, 175, 55, 0.4);
+  border-radius: 50%;
+  animation: patternRotate 20s linear infinite;
+}
+
+.pattern-ring-1 {
+  width: 250px;
+  height: 250px;
+  animation-duration: 25s;
+}
+
+.pattern-ring-2 {
+  width: 200px;
+  height: 200px;
+  animation-duration: 20s;
+  animation-direction: reverse;
+}
+
+.pattern-ring-3 {
+  width: 150px;
+  height: 150px;
+  animation-duration: 15s;
+}
+
+.pattern-ring-1::before,
+.pattern-ring-1::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgba(212, 175, 55, 0.5);
+  border-radius: 50%;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.pattern-ring-1::after {
+  bottom: -4px;
+  top: auto;
+}
+
+.pattern-ring-2::before {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(212, 175, 55, 0.4);
+  border-radius: 50%;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@keyframes patternRotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Decorative Stars */
+.decorative-star {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.6));
+  animation: decorativeTwinkle 3s ease-in-out infinite;
+  z-index: 2;
+}
+
+.star-1 {
+  top: 25%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.star-2 {
+  top: 30%;
+  right: 12%;
+  animation-delay: 0.75s;
+}
+
+.star-3 {
+  bottom: 30%;
+  left: 12%;
+  animation-delay: 1.5s;
+}
+
+.star-4 {
+  bottom: 35%;
+  right: 10%;
+  animation-delay: 2.25s;
+}
+
+@keyframes decorativeTwinkle {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .islamic-animation-container {
+    min-height: 300px;
+    max-width: 400px;
+    max-height: 400px;
+  }
+  
+  .crescent-moon {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .islamic-star {
+    width: 24px;
+    height: 24px;
+    margin-top: 55px;
+  }
+  
+  .lantern {
+    width: 40px;
+    height: 55px;
+  }
+  
+  .date-body {
+    width: 16px;
+    height: 22px;
+  }
+  
+  .tasbih {
+    width: 160px;
+  }
+  
+  .bead {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .geometric-pattern {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .pattern-ring-1 {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .pattern-ring-2 {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .pattern-ring-3 {
+    width: 120px;
+    height: 120px;
+  }
+}

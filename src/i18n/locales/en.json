@@ -1,0 +1,106 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "download": "Download",
+    "share": "Share"
+  },
+  "ramadan": {
+    "title": "Eidora",
+    "pageTitle": "Ramadan Cards 2026",
+    "greeting": "Ramadan & Eid Greetings",
+    "createCard": "Create Card",
+    "selectTemplate": "Select Template",
+    "customize": "Customize",
+    "addText": "Add Text",
+    "addSticker": "Add Sticker",
+    "changeBackground": "Change Background"
+  },
+  "hero": {
+    "title": "Create Beautiful Ramadan & Eid Cards",
+    "subtitle": "Design and share heartfelt greetings with your loved ones this blessed season",
+    "description": "Express your warmest wishes with our easy-to-use card designer. Choose from beautiful templates, customize with your own text and decorations, and share the spirit of Ramadan and Eid.",
+    "cta": "Start Creating"
+  },
+  "editor": {
+    "title": "Card Editor",
+    "preview": "Preview",
+    "text": "Text",
+    "font": "Font",
+    "size": "Size",
+    "color": "Color",
+    "position": "Position"
+  },
+  "info": {
+    "title": "About Islam & Ramadan",
+    "subtitle": "Understanding the Blessed Month",
+    "islam": {
+      "title": "What is Islam?",
+      "description": "Islam is a monotheistic religion founded on the teachings of Prophet Muhammad (peace be upon him). It emphasizes peace, submission to God (Allah), and living a righteous life. Muslims follow the Five Pillars of Islam as the foundation of their faith."
+    },
+    "ramadan": {
+      "title": "The Month of Ramadan",
+      "description": "Ramadan is the ninth month of the Islamic lunar calendar, observed by Muslims worldwide as a month of fasting, prayer, reflection, and community. It commemorates the first revelation of the Quran to Prophet Muhammad."
+    },
+    "fasting": {
+      "title": "Fasting (Sawm)",
+      "description": "During Ramadan, Muslims fast from dawn until sunset, abstaining from food, drink, and other physical needs. Fasting teaches self-discipline, empathy, and gratitude, while purifying the soul and strengthening faith."
+    },
+    "eid": {
+      "title": "Eid al-Fitr",
+      "description": "Eid al-Fitr marks the end of Ramadan, celebrated with prayers, feasting, and giving gifts. It's a time of joy, gratitude, and community, where Muslims gather to share meals and exchange greetings with family and friends."
+    },
+    "prayer": {
+      "title": "Prayer & Reflection",
+      "description": "Ramadan is a time for increased prayer, reading the Quran, and spiritual reflection. Muslims engage in Taraweeh prayers at night and seek forgiveness, guidance, and blessings during this holy month."
+    },
+    "charity": {
+      "title": "Charity (Zakat)",
+      "description": "Charity is highly emphasized during Ramadan. Muslims give Zakat (obligatory charity) and Sadaqah (voluntary charity) to help those in need, fostering compassion, generosity, and social responsibility."
+    }
+  },
+  "countdown": {
+    "title": "Countdown to Ramadan 2026",
+    "subtitle": "The Blessed Month is Coming",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "message": "Prepare your heart for the holy month"
+  },
+  "cardTemplates": {
+    "title": "Cards Templates",
+    "subTitle": "Pick & Customize your card",
+    "ramadanTemplates": {
+      "title": "Ramadan Cards",
+      "description": "Minimal and spiritual Ramadan card designs inspired by Islamic art and calm colors.",
+      "buttonText": "Explore Ramadan Cards"
+    },
+    "eidTemplates": {
+      "title": "Eid Cards",
+      "description": "Joyful Eid card templates with modern layouts and festive elegance.",
+      "buttonText": "Explore Eid Cards"
+    }
+  },
+  "footer": {
+    "title": "Eidora",
+    "subTitle": "Create and share beautiful Ramadan & Eid greeting cards with your loved ones.",
+    "quickLinks": "Quick Links",
+    "home": "Home",
+    "createCard":"Create Card",
+    "followUs": "Follow Us",
+    "followUsTitle": "Share joy and blessings with everyone.",
+    "socials": {
+      "whatsapp": "WhatsApp",
+      "instagram": "Instagram",
+      "facebook": "Facebook"
+    },
+    "copyright": "Eidora. All rights reserved."
+  }
+}
+
