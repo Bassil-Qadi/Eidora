@@ -1,0 +1,212 @@
+import { TextElement } from "../../types/editor";
+import { GOOGLE_FONTS } from "../../constants/fonts";
+import { measureTextWidth } from "../../utils/measureTextWidth";
+
+import {
+  MdAlignHorizontalLeft,
+  MdAlignHorizontalRight,
+  MdVerticalAlignTop,
+  MdVerticalAlignBottom,
+  MdAlignHorizontalCenter,
+  MdAlignVerticalCenter,
+} from "react-icons/md";
+
+interface Props {
+  text: TextElement;
+  onChange: (updates: Partial<TextElement>) => void;
+}
+
+const fonts = ["Arial", "Georgia", "Times New Roman", "Courier New", "Verdana"];
+
+export default function TextControls({ text, onChange }: Props) {
+
+  const alignHorizontal = (pos: "left" | "center" | "right") => {
+    const canvasWidth = 360; // SAME as your canvas width
+    const paddingPx = 12;
+  
+    const textWidthPx = measureTextWidth(
+      text.text,
+      text.fontSize
+    );
+  
+    const textWidthPercent = (textWidthPx / canvasWidth) * 100;
+    const paddingPercent = (paddingPx / canvasWidth) * 100;
+  
+    if (pos === "center") {
+      onChange({ x: 50 });
+    }
+  
+    if (pos === "left") {
+      onChange({
+        x: paddingPercent + textWidthPercent / 2,
+      });
+    }
+  
+    if (pos === "right") {
+      onChange({
+        x: 100 - paddingPercent - textWidthPercent / 2,
+      });
+    }
+  };
+  
+
+  const alignVertical = (pos: "top" | "center" | "bottom") => {
+    if (pos === "top") onChange({ y: 10 });
+    if (pos === "center") onChange({ y: 50 });
+    if (pos === "bottom") onChange({ y: 90 });
+  };
+
+  return (
+    <div className="flex flex-col gap-2 space-y-4">
+      {/* Font family */}
+      <div>
+        <label className="text-sm font-medium">Font Family</label>
+        <select
+          value={text.fontFamily}
+          onChange={(e) => onChange({ fontFamily: e.target.value })}
+          className="w-full border rounded px-2 py-1"
+          style={{ fontFamily: text.fontFamily }}
+        >
+          {GOOGLE_FONTS.map((font) => (
+            <option
+              key={font}
+              value={font}
+              style={{ fontFamily: font }}
+            >
+              {font}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Font size */}
+      <div>
+        <label className="text-sm font-medium">Size</label>
+        <input
+          type="range"
+          min={12}
+          max={72}
+          value={text.fontSize}
+          onChange={(e) => onChange({ fontSize: Number(e.target.value) })}
+          className="w-full"
+        />
+      </div>
+
+      {/* Color */}
+      <div>
+        <label className="text-sm font-medium">Color</label>
+        <input
+          type="color"
+          value={text.color}
+          onChange={(e) => onChange({ color: e.target.value })}
+          className="w-full h-10"
+        />
+      </div>
+
+      {/* Style toggles */}
+      <div className="flex flex-col gap-2">
+      <p className="text-sm font-medium">Font Style</p>
+      <div className="flex gap-2">
+        <button
+          onClick={() => onChange({ bold: !text.bold })}
+          className={`px-3 py-1 border rounded ${text.bold ? "bg-gray-200" : ""}`}
+        >
+          B
+        </button>
+
+        <button
+          onClick={() => onChange({ italic: !text.italic })}
+          className={`px-3 py-1 border rounded ${text.italic ? "bg-gray-200" : ""}`}
+        >
+          I
+        </button>
+
+        <button
+          onClick={() => onChange({ underline: !text.underline })}
+          className={`px-3 py-1 border rounded ${text.underline ? "bg-gray-200" : ""}`}
+        >
+          U
+        </button>
+      </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+      <p className="text-sm font-medium">Text Alignment</p>
+        <div className="flex gap-2">
+        <button className="
+                    flex-1
+                    h-10
+                    flex
+                    items-center
+                    justify-center
+                    bg-gray-100
+                    rounded
+                    hover:bg-gray-200
+                  " onClick={() => alignVertical("top")}>
+          <MdVerticalAlignTop />
+        </button>
+        <button className="
+                    flex-1
+                    h-10
+                    flex
+                    items-center
+                    justify-center
+                    bg-gray-100
+                    rounded
+                    hover:bg-gray-200
+                  " onClick={() => alignVertical("center")}>
+          <MdAlignVerticalCenter />
+        </button>
+        <button className="
+                    flex-1
+                    h-10
+                    flex
+                    items-center
+                    justify-center
+                    bg-gray-100
+                    rounded
+                    hover:bg-gray-200
+                  " onClick={() => alignVertical("bottom")}>
+          <MdVerticalAlignBottom />
+        </button>
+        <button className="
+                    flex-1
+                    h-10
+                    flex
+                    items-center
+                    justify-center
+                    bg-gray-100
+                    rounded
+                    hover:bg-gray-200
+                  " onClick={() => alignHorizontal("left")}>
+          <MdAlignHorizontalLeft />
+        </button>
+        <button className="
+                    flex-1
+                    h-10
+                    flex
+                    items-center
+                    justify-center
+                    bg-gray-100
+                    rounded
+                    hover:bg-gray-200
+                  " onClick={() => alignHorizontal("center")}>
+          <MdAlignHorizontalCenter />
+        </button>
+        <button className="
+                    flex-1
+                    h-10
+                    flex
+                    items-center
+                    justify-center
+                    bg-gray-100
+                    rounded
+                    hover:bg-gray-200
+                  " onClick={() => alignHorizontal("right")}>
+          <MdAlignHorizontalRight />
+        </button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -6,18 +6,20 @@ import './App.css'
 
 // Pages
 import Home from './pages/Home'
+import Editor from './pages/Editor'
 
 
 function App() {
   return (
     <div className='w-full'>
-      <Navbar />
+      {/* <Navbar /> */}
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path='/editor' element={<Editor />} />
         </Routes>
       </Router>
-      <Footer />
+      {/* <Footer /> */}
       <ScrollToTopButton />
     </div>
   )
