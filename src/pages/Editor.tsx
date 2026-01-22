@@ -1,11 +1,10 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { toPng } from "html-to-image";
 import Canvas from "../components/Editor/Canvas";
 import TextControls from "../components/Editor/TextControls";
 import BackgroundControls from "../components/Editor/BackgroundControls";
 import TemplatesPanel from '../components/Editor/TemplatesPanel';
 import SidebarButton from '../components/UI/SidebarButton';
-import DuaPanel from '../components/Editor/DuaPanel';
 import DuaBar from '../components/Editor/DuaBar';
 import { useEditor } from "../hooks/useEditor";
 import { TextElement } from "../types/editor";
@@ -16,16 +15,16 @@ import { MdTextFields, MdEmojiEmotions, MdImage, MdPalette } from "react-icons/m
 const Editor = () => {
 
   const canvasRef = useRef<HTMLDivElement>(null);
-  const { state, addText, selectElement, clearSelection, updateTextElement, moveElement, addSticker, resizeElement, rotateElement, deleteSelected, setBackground, bringForward, sendBackward, applyTemplate, addDuaText } = useEditor();
+  const { state, addText, selectElement, clearSelection, updateTextElement, moveElement, addSticker, resizeElement, rotateElement, deleteSelected, setBackground, bringForward, sendBackward, applyTemplate, addDuaText, undo, redo } = useEditor();
 
   const selectedElement =
-    state.selectedElementIds.length === 1
+    state?.selectedElementIds?.length === 1
       ? state.elements.find(
         (el) => el.id === state.selectedElementIds[0]
       )
       : undefined;
   const selectedText =
-    state.selectedElementIds.length === 1
+    state?.selectedElementIds?.length === 1
       ? (state.elements.find(
         (el) =>
           el.id === state.selectedElementIds[0] &&
@@ -34,9 +33,30 @@ const Editor = () => {
       : undefined;
 
   const singleSelectedId =
-    state.selectedElementIds.length === 1
+    state?.selectedElementIds?.length === 1
       ? state.selectedElementIds[0]
       : null;
+
+      useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+          if (e.ctrlKey && e.key === "z" && !e.shiftKey) {
+            e.preventDefault();
+            undo();
+          }
+      
+          if (
+            (e.ctrlKey && e.shiftKey && e.key === "z") ||
+            (e.ctrlKey && e.key === "y")
+          ) {
+            e.preventDefault();
+            redo();
+          }
+        };
+      
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+      }, []);
+      
 
   const handleDownload = async () => {
     if (!canvasRef.current) return;
