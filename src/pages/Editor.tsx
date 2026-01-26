@@ -11,11 +11,12 @@ import { TextElement } from "../types/editor";
 import { templates } from '../data/templates';
 import { DUAS } from '../data/duas';
 import { MdTextFields, MdEmojiEmotions, MdImage, MdPalette } from "react-icons/md";
+import UndoRedoContainer from '../components/UI/UndoRedoContainer';
 
 const Editor = () => {
 
   const canvasRef = useRef<HTMLDivElement>(null);
-  const { state, addText, selectElement, clearSelection, updateTextElement, moveElement, addSticker, resizeElement, rotateElement, deleteSelected, setBackground, bringForward, sendBackward, applyTemplate, addDuaText, undo, redo } = useEditor();
+  const { state, addText, selectElement, clearSelection, updateTextElement, moveElement, addSticker, resizeElement, rotateElement, deleteSelected, setBackground, bringForward, sendBackward, applyTemplate, addDuaText, undo, redo, canRedo, canUndo } = useEditor();
 
   const selectedElement =
     state?.selectedElementIds?.length === 1
@@ -124,6 +125,12 @@ const Editor = () => {
         {/* Canvas Area */}
         <main className="flex-1 flex items-center justify-center bg-gray-50">
           <div className="flex flex-col items-center">
+            <UndoRedoContainer
+              undo={undo}
+              redo={redo}
+              canUndo={canUndo}
+              canRedo={canRedo}
+            />
             <Canvas
               ref={canvasRef}
               elements={state.elements}

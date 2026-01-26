@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../hooks/useLanguage';
 import { IslamicAnimation } from '../components/UI/IslamicAnimation';
 import { BackgroundPattern } from '../components/UI/BackgroundPattern';
@@ -7,8 +8,11 @@ import { RamadanCountdown } from '../components/UI/RamadanCountdown';
 import CardTemplatesSection from '../components/Templates/CardsTemplateSection';
 
 export default function Home() {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
+
+  const handleRedirect = () => navigate('/editor');
 
   return (
     <div className='w-full min-h-screen relative'>
@@ -48,7 +52,7 @@ export default function Home() {
 
                 {/* CTA Button */}
                 <div className='pt-4'>
-                  <button className='px-8 py-4 bg-gradient-to-r from-gold to-yellow-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 hover:from-yellow-500 hover:to-gold'>
+                  <button onClick={() => handleRedirect()} className='px-8 py-4 bg-gradient-to-r from-gold to-yellow-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 hover:from-yellow-500 hover:to-gold'>
                     {t('hero.cta')}
                   </button>
                 </div>
@@ -204,7 +208,7 @@ export default function Home() {
               </span>
             </h2>
           </div>
-          <CardTemplatesSection />
+          <CardTemplatesSection handleRedirect={handleRedirect} />
         </div>
       </section>
     </div>

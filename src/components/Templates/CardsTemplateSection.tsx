@@ -4,7 +4,11 @@ import { useLanguage } from "../../hooks/useLanguage";
 
 const gold = "#d4af37";
 
-const CardTemplatesSection = () => {
+interface CardsTemplateSectionProps {
+  handleRedirect: () => void;
+}
+
+const CardTemplatesSection = ({ handleRedirect }: CardsTemplateSectionProps) => {
 
     const { t } = useLanguage();
 
@@ -47,6 +51,7 @@ const CardTemplatesSection = () => {
                   borderColor: gold,
                   color: gold,
                 }}
+                onClick={() => handleRedirect()}
               >
                 {t("cardTemplates.ramadanTemplates.buttonText")}
               </button>
@@ -86,6 +91,7 @@ const CardTemplatesSection = () => {
                   borderColor: gold,
                   color: gold,
                 }}
+                onClick={() => handleRedirect()}
               >
                 {t("cardTemplates.eidTemplates.buttonText")}
               </button>

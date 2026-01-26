@@ -37,6 +37,9 @@ export const useEditor = () => {
   });
 
   const state = history.present;
+  const canUndo = history.past.length > 0;
+  const canRedo = history.future.length > 0;
+
 
   /* ---------------------------------- */
   /* Helper: commit state to history */
@@ -351,6 +354,8 @@ export const useEditor = () => {
   /* ---------------------------------- */
   return {
     state,
+    canUndo, 
+    canRedo,
     undo,
     redo,
     setActiveTool,
