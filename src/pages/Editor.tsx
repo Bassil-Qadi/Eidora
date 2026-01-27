@@ -7,20 +7,22 @@ import TemplatesPanel from '../components/Editor/TemplatesPanel';
 import SidebarButton from '../components/UI/SidebarButton';
 import StickerPicker from '../components/Editor/StickerPicker';
 import DuaBar from '../components/Editor/DuaBar';
+import Button from '../components/UI/Button';
 import { useEditor } from "../hooks/useEditor";
 import { useLanguage } from "../hooks/useLanguage";
 import { TextElement } from "../types/editor";
 import { templates } from '../data/templates';
 import { DUAS } from '../data/duas';
 import { STICKERS } from '../data/stickers';
-import { MdTextFields, MdEmojiEmotions, MdImage, MdPalette } from "react-icons/md";
+import { MdTextFields, MdEmojiEmotions, MdImage, MdPalette, MdContentCopy } from "react-icons/md";
+import { FiTrash } from "react-icons/fi";
 import UndoRedoContainer from '../components/UI/UndoRedoContainer';
 
 const Editor = () => {
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
-  const { state, addText, selectElement, clearSelection, updateTextElement, moveElement, addSticker, resizeElement, rotateElement, deleteSelected, setBackground, bringForward, sendBackward, applyTemplate, addDuaText, undo, redo, canRedo, canUndo } = useEditor();
+  const { state, addText, selectElement, clearSelection, updateTextElement, moveElement, addSticker, resizeElement, rotateElement, deleteSelected, setBackground, bringForward, sendBackward, applyTemplate, addDuaText, undo, redo, duplicateSelected, canRedo, canUndo } = useEditor();
   const [showStickers, setShowStickers] = useState(false);  
 
   const selectedElement =
@@ -157,6 +159,7 @@ const Editor = () => {
               background={state.previewImage ? `url(${state.previewImage}) center/cover` : state.background}
               previewImage={state.previewImage}
               onClearSelection={clearSelection}
+              duplicateSelected={duplicateSelected}
             />
             <div className="w-full border-t pt-4 m-20"></div>
             <DuaBar
@@ -225,12 +228,22 @@ const Editor = () => {
             />
           )}
 
+          <div className='mt-auto flex flex-col items-center gap-2'>
+          {state.selectedElementIds.length > 0 && (
+            <Button
+              onClick={duplicateSelected}
+              className="w-full py-2 text-sm bg-indigo-100 text-indigo-700 text-center rounded-md hover:bg-indigo-200 transition"
+              icon={<MdContentCopy />}
+            >
+              {t('editor.controlsSidebar.duplicateElementBtn')}
+            </Button>
+          )}
+
           {/* DELETE BUTTON */}
           {state.selectedElementIds.length > 0 && (
-            <button
+            <Button
               onClick={deleteSelected}
               className="
-                mt-auto
                 w-full
                 text-center
                 py-2
@@ -240,11 +253,12 @@ const Editor = () => {
                 rounded-md
                 hover:bg-red-200
               "
+              icon={<FiTrash />}
             >
               {t('editor.controlsSidebar.deleteElementBtn')}
-            </button>
+            </Button>
           )}
-
+          </div>
         </aside>
       </div>
     </div>

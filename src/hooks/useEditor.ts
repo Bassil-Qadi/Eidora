@@ -154,6 +154,28 @@ export const useEditor = () => {
     }));
   };
 
+  const duplicateSelected = () => {
+    commitState(prev => {
+      if (prev.selectedElementIds.length === 0) return prev;
+  
+      const duplicated = prev.elements
+        .filter(el => prev.selectedElementIds.includes(el.id))
+        .map(el => ({
+          ...el,
+          id: crypto.randomUUID(),
+          x: el.x + 3, // offset
+          y: el.y + 3,
+        }));
+  
+      return {
+        ...prev,
+        elements: [...prev.elements, ...duplicated],
+        selectedElementIds: duplicated.map(el => el.id),
+      };
+    });
+  };
+  
+
   const addDuaText = (text: string) => {
     const newText: TextElement = {
       id: crypto.randomUUID(),
@@ -388,5 +410,6 @@ export const useEditor = () => {
     bringForward,
     sendBackward,
     applyTemplate,
+    duplicateSelected
   };
 };

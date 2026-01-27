@@ -64,7 +64,8 @@
         "backward": "إرسال إلى الخلف"
       },
       "DuaaTitle": "أدعية جاهزة",
-      "deleteElementBtn": "حذف العنصر"
+      "deleteElementBtn": "حذف العنصر",
+      "duplicateElementBtn": "نسخ العنصر"
     }
   },
   "info": {

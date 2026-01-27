@@ -64,7 +64,8 @@
         "backward": "Send Backward"
       },
       "DuaaTitle": "Ready Duʿāʾ",
-      "deleteElementBtn": "Delete Element"
+      "deleteElementBtn": "Delete Element",
+      "duplicateElementBtn": "Duplicate Element"
     }
   },
   "info": {

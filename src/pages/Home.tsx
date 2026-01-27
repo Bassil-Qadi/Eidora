@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../hooks/useLanguage';
@@ -6,6 +5,8 @@ import { IslamicAnimation } from '../components/UI/IslamicAnimation';
 import { BackgroundPattern } from '../components/UI/BackgroundPattern';
 import { RamadanCountdown } from '../components/UI/RamadanCountdown';
 import CardTemplatesSection from '../components/Templates/CardsTemplateSection';
+import Navbar from '../components/UI/Navbar';
+import Footer from '../components/UI/Footer';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function Home() {
 
   return (
     <div className='w-full min-h-screen relative'>
+      <Navbar />
       {/* Background Pattern */}
       <BackgroundPattern />
       
@@ -211,6 +213,8 @@ export default function Home() {
           <CardTemplatesSection handleRedirect={handleRedirect} />
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

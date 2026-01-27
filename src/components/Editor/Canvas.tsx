@@ -13,6 +13,7 @@ interface CanvasProps {
   onResize: (id: string, width: number, height: number) => void;
   onRotate: (id: string, rotation: number) => void;
   onDelete: (id: string) => void;
+  duplicateSelected: () => void;
   background: string;
   previewImage?: string;
 }
@@ -32,6 +33,7 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
       onResize,
       onRotate,
       onDelete,
+      duplicateSelected,
       background,
       previewImage
     },
@@ -180,6 +182,30 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
       return () => window.removeEventListener("keydown", handleKeyDown);
     }, [selectedElementId, editingId]);
 
+    useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Delete
+        if (
+          (e.key === "Delete" || e.key === "Backspace") &&
+          selectedElementIds.length > 0 &&
+          !editingId
+        ) {
+          e.preventDefault();
+          selectedElementIds.forEach(id => onDelete(id));
+        }
+    
+        // Duplicate (Ctrl+D / Cmd+D)
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d") {
+          e.preventDefault();
+          // call duplicate
+          duplicateSelected();
+        }
+      };
+    
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [selectedElementIds, editingId]);
+    
 
     return (
       <div className="flex items-center justify-center">
