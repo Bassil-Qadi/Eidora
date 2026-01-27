@@ -26,7 +26,7 @@ export const RamadanCountdown: React.FC = () => {
   useEffect(() => {
     // Target date: February 28, 2026 at 00:00:00 local time
     // Month is 0-indexed, so 1 = February
-    const targetDate = new Date(2026, 1, 28, 0, 0, 0, 0);
+    const targetDate = new Date(2026, 1, 18, 0, 0, 0, 0);
     const targetTimestamp = targetDate.getTime();
 
     const updateCountdown = () => {

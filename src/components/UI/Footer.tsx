@@ -1,3 +1,4 @@
+import { FaWhatsapp, FaInstagram, FaFacebook } from "react-icons/fa";
 import { useLanguage } from "../../hooks/useLanguage"
 
 const Footer = () => {
@@ -24,12 +25,12 @@ const Footer = () => {
           <ul className="space-y-2 text-sm">
             <li>
               <a href="/" className="hover:text-gray-600 transition">
-              {t("footer.home")}
+                {t("footer.home")}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-gray-600 transition">
-              {t("footer.createCard")}
+                {t("footer.createCard")}
               </a>
             </li>
           </ul>
@@ -39,12 +40,12 @@ const Footer = () => {
         <div>
           <h3 className="font-semibold mb-3">{t("footer.followUs")}</h3>
           <p className="text-sm text-gray-700 mb-3">
-          {t("footer.followUsTitle")}
+            {t("footer.followUsTitle")}
           </p>
           <div className="flex gap-4 text-sm">
-            <a href="#" className="hover:text-gray-600 transition">{t("footer.socials.instagram")}</a>
-            <a href="#" className="hover:text-gray-600 transition">{t("footer.socials.facebook")}</a>
-            <a href="#" className="hover:text-gray-600 transition">{t("footer.socials.whatsapp")}</a>
+            <FaWhatsapp className="text-green-500 cursor-pointer" />
+            <FaInstagram className="text-pink-500 cursor-pointer" />
+            <FaFacebook className="text-blue-600 cursor-pointer" />
           </div>
         </div>
 
