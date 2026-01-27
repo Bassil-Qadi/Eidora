@@ -8,6 +8,7 @@ import SidebarButton from '../components/UI/SidebarButton';
 import StickerPicker from '../components/Editor/StickerPicker';
 import DuaBar from '../components/Editor/DuaBar';
 import Button from '../components/UI/Button';
+import { LanguageSwitcher } from '../components/UI/LanguageSwitcher';
 import { useEditor } from "../hooks/useEditor";
 import { useLanguage } from "../hooks/useLanguage";
 import { TextElement } from "../types/editor";
@@ -93,12 +94,15 @@ const Editor = () => {
 
         <div className="text-sm text-gray-500">{t('editor.navbar.title')}</div>
 
-        <button
+        <div className='flex items-center gap-4'>
+          <button
           className="px-4 py-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
           onClick={handleDownload}
         >
           {t('editor.navbar.buttonText')}
         </button>
+        <LanguageSwitcher />
+        </div>
       </header>
 
       {/* Main Editor Area */}
