@@ -28,13 +28,44 @@
     "cta": "Start Creating"
   },
   "editor": {
-    "title": "Card Editor",
-    "preview": "Preview",
-    "text": "Text",
-    "font": "Font",
-    "size": "Size",
-    "color": "Color",
-    "position": "Position"
+    "navbar": {
+      "title": "Card Editor",
+      "buttonText": "Download"
+    },
+    "optionsSidebar": {
+      "addTextBtn": "Text",
+      "addStickerBtn": "Sticker",
+      "AddImageBtn": "Image",
+      "AddBackgroundBtn": "Background"
+    },
+    "controlsSidebar": {
+      "title": "Controls",
+      "controls": {
+        "background": "Background",
+        "gradients": "Gradients",
+        "templates": "Templates"
+      },
+      "textControls": {
+        "fontFamily": "Font Family",
+        "fontSize": "Size",
+        "fontColor": "Color",
+        "fontStyle": "Font Style",
+        "textAlignment": "Text Alignment"
+      },
+      "stickerControls": {
+        "title": "Stickers",
+        "filter": {
+          "firstOption": "Ramadan",
+          "secondOption": "Eid"
+        }
+      },
+      "layerOptions": {
+        "forward": "Bring Forward",
+        "backward": "Send Backward"
+      },
+      "DuaaTitle": "Ready Duʿāʾ",
+      "deleteElementBtn": "Delete Element"
+    }
   },
   "info": {
     "title": "About Islam & Ramadan",

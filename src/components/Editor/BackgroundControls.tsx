@@ -1,3 +1,5 @@
+import { useLanguage } from "../../hooks/useLanguage";
+
 interface Props {
   value: string;
   onChange: (color: string) => void;
@@ -12,9 +14,12 @@ const gradients = [
 ];
 
 export default function BackgroundControls({ value, onChange }: Props) {
+
+  const { t } = useLanguage();
+
   return (
-    <div className="space-y-3">
-      <label className="text-sm font-medium">Background</label>
+    <div className="flex flex-col gap-4">
+      <label className="text-sm font-medium">{t('editor.controlsSidebar.controls.background')}</label>
 
       {/* Solid color picker */}
       <input
@@ -37,7 +42,7 @@ export default function BackgroundControls({ value, onChange }: Props) {
       </div>
 
       {/* Preset gradients */}
-      <label className="text-sm font-medium mt-2">Gradients</label>
+      <label className="text-sm font-medium mt-2">{t('editor.controlsSidebar.controls.gradients')}</label>
       <div className="flex gap-2">
         {gradients.map((g, idx) => (
           <button

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "../../hooks/useLanguage";
 import { DuaItem, DuaCategory } from "../../types/dua";
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export default function DuaBar({ duas, onSelect }: Props) {
+  const { t } = useLanguage();
   const [active, setActive] = useState<DuaCategory>("ramadan");
 
   const filtered = duas.filter((d) => d.category === active);
@@ -16,7 +18,7 @@ export default function DuaBar({ duas, onSelect }: Props) {
       {/* Header + Filter */}
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-sm font-medium text-gray-600">
-          Ready Duʿāʾ
+          {t('editor.controlsSidebar.DuaaTitle')}
         </h4>
 
         <div className="flex rounded-lg border bg-gray-50 p-1">
@@ -37,7 +39,7 @@ export default function DuaBar({ duas, onSelect }: Props) {
                 }
               `}
             >
-              {cat === "ramadan" ? "Ramadan" : "Eid"}
+              {cat === "ramadan" ? t('editor.controlsSidebar.stickerControls.filter.firstOption') : t('editor.controlsSidebar.stickerControls.filter.secondOption')}
             </button>
           ))}
         </div>

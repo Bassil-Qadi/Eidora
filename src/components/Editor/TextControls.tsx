@@ -1,3 +1,4 @@
+import { useLanguage } from "../../hooks/useLanguage";
 import { TextElement } from "../../types/editor";
 import { GOOGLE_FONTS } from "../../constants/fonts";
 import { measureTextWidth } from "../../utils/measureTextWidth";
@@ -16,10 +17,9 @@ interface Props {
   onChange: (updates: Partial<TextElement>) => void;
 }
 
-const fonts = ["Arial", "Georgia", "Times New Roman", "Courier New", "Verdana"];
-
 export default function TextControls({ text, onChange }: Props) {
 
+  const { t } = useLanguage();
   const alignHorizontal = (pos: "left" | "center" | "right") => {
     const canvasWidth = 360; // SAME as your canvas width
     const paddingPx = 12;
@@ -60,7 +60,7 @@ export default function TextControls({ text, onChange }: Props) {
     <div className="flex flex-col gap-2 space-y-4">
       {/* Font family */}
       <div>
-        <label className="text-sm font-medium">Font Family</label>
+        <label className="text-sm font-medium">{t('editor.controlsSidebar.textControls.fontFamily')}</label>
         <select
           value={text.fontFamily}
           onChange={(e) => onChange({ fontFamily: e.target.value })}
@@ -81,7 +81,7 @@ export default function TextControls({ text, onChange }: Props) {
 
       {/* Font size */}
       <div>
-        <label className="text-sm font-medium">Size</label>
+        <label className="text-sm font-medium">{t('editor.controlsSidebar.textControls.fontSize')}</label>
         <input
           type="range"
           min={12}
@@ -94,7 +94,7 @@ export default function TextControls({ text, onChange }: Props) {
 
       {/* Color */}
       <div>
-        <label className="text-sm font-medium">Color</label>
+        <label className="text-sm font-medium">{t('editor.controlsSidebar.textControls.fontColor')}</label>
         <input
           type="color"
           value={text.color}
@@ -105,7 +105,7 @@ export default function TextControls({ text, onChange }: Props) {
 
       {/* Style toggles */}
       <div className="flex flex-col gap-2">
-      <p className="text-sm font-medium">Font Style</p>
+      <p className="text-sm font-medium">{t('editor.controlsSidebar.textControls.fontStyle')}</p>
       <div className="flex gap-2">
         <button
           onClick={() => onChange({ bold: !text.bold })}
@@ -131,7 +131,7 @@ export default function TextControls({ text, onChange }: Props) {
       </div>
 
       <div className="flex flex-col gap-2">
-      <p className="text-sm font-medium">Text Alignment</p>
+      <p className="text-sm font-medium">{t('editor.controlsSidebar.textControls.textAlignment')}</p>
         <div className="flex gap-2">
         <button className="
                     flex-1

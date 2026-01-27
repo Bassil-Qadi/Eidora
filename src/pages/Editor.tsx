@@ -1,22 +1,27 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toPng } from "html-to-image";
 import Canvas from "../components/Editor/Canvas";
 import TextControls from "../components/Editor/TextControls";
 import BackgroundControls from "../components/Editor/BackgroundControls";
 import TemplatesPanel from '../components/Editor/TemplatesPanel';
 import SidebarButton from '../components/UI/SidebarButton';
+import StickerPicker from '../components/Editor/StickerPicker';
 import DuaBar from '../components/Editor/DuaBar';
 import { useEditor } from "../hooks/useEditor";
+import { useLanguage } from "../hooks/useLanguage";
 import { TextElement } from "../types/editor";
 import { templates } from '../data/templates';
 import { DUAS } from '../data/duas';
+import { STICKERS } from '../data/stickers';
 import { MdTextFields, MdEmojiEmotions, MdImage, MdPalette } from "react-icons/md";
 import UndoRedoContainer from '../components/UI/UndoRedoContainer';
 
 const Editor = () => {
 
   const canvasRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
   const { state, addText, selectElement, clearSelection, updateTextElement, moveElement, addSticker, resizeElement, rotateElement, deleteSelected, setBackground, bringForward, sendBackward, applyTemplate, addDuaText, undo, redo, canRedo, canUndo } = useEditor();
+  const [showStickers, setShowStickers] = useState(false);  
 
   const selectedElement =
     state?.selectedElementIds?.length === 1
@@ -78,13 +83,13 @@ const Editor = () => {
       <header className="h-16 bg-white border-b flex items-center justify-between px-6">
         <div className="font-semibold text-lg">Eidora</div>
 
-        <div className="text-sm text-gray-500">Card Editor</div>
+        <div className="text-sm text-gray-500">{t('editor.navbar.title')}</div>
 
         <button
           className="px-4 py-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
           onClick={handleDownload}
         >
-          Download
+          {t('editor.navbar.buttonText')}
         </button>
       </header>
 
@@ -93,29 +98,30 @@ const Editor = () => {
         {/* Left Toolbar */}
         <aside className="w-24 bg-white border-r flex flex-col items-center py-4 gap-4">
           <SidebarButton
-            label="Text"
+            label={t('editor.optionsSidebar.addTextBtn')}
             color="blue"
             icon={<MdTextFields />}
             onClick={addText}
           />
 
           <SidebarButton
-            label="Sticker"
+            label={t('editor.optionsSidebar.addStickerBtn')}
             color="yellow"
             icon={<MdEmojiEmotions />}
-            onClick={() =>
-              addSticker("/assets/stickers/icons8-ramadan-48.png")
-            }
+            onClick={() => setShowStickers((v) => !v)}
+            // onClick={() =>
+            //   addSticker("/assets/stickers/icons8-ramadan-48.png")
+            // }
           />
 
           <SidebarButton
-            label="Image"
+            label={t('editor.optionsSidebar.AddImageBtn')}
             color="green"
             icon={<MdImage />}
           />
 
           <SidebarButton
-            label="Background"
+            label={t('editor.optionsSidebar.AddBackgroundBtn')}
             color="purple"
             icon={<MdPalette />}
           />
@@ -156,7 +162,7 @@ const Editor = () => {
 
         {/* Right Controls Panel */}
         <aside className="w-72 bg-white border-l p-4 flex flex-col">
-          <h3 className="font-medium mb-3">Controls</h3>
+          <h3 className="font-medium mb-3">{t('editor.controlsSidebar.title')}</h3>
 
           {/* TEXT CONTROLS */}
           {selectedText && (
@@ -187,27 +193,31 @@ const Editor = () => {
             <div className="mt-4 space-y-2">
               <button
                 onClick={() => bringForward(singleSelectedId)}
-                className="w-full py-2 text-sm bg-gray-100 rounded hover:bg-gray-200"
+                className="w-full py-2 text-sm text-center bg-gray-100 rounded hover:bg-gray-200"
               >
-                Bring Forward
+                {t('editor.controlsSidebar.layerOptions.forward')}
               </button>
 
               <button
                 onClick={() => sendBackward(singleSelectedId)}
-                className="w-full py-2 text-sm bg-gray-100 rounded hover:bg-gray-200"
+                className="w-full py-2 text-sm text-center bg-gray-100 rounded hover:bg-gray-200"
               >
-                Send Backward
+                {t('editor.controlsSidebar.layerOptions.backward')}
               </button>
             </div>
           )}
 
           <TemplatesPanel onSelect={applyTemplate} templates={templates} />
 
-          {/* <DuaPanel
-            duas={ramadanDuas}
-            onSelect={addDuaText}
-          /> */}
-
+          {showStickers && (
+            <StickerPicker
+              stickers={STICKERS}
+              onSelect={(src) => {
+                addSticker(src);
+                setShowStickers(false);
+              }}
+            />
+          )}
 
           {/* DELETE BUTTON */}
           {state.selectedElementIds.length > 0 && (
@@ -216,6 +226,7 @@ const Editor = () => {
               className="
                 mt-auto
                 w-full
+                text-center
                 py-2
                 text-sm
                 bg-red-100
@@ -224,13 +235,11 @@ const Editor = () => {
                 hover:bg-red-200
               "
             >
-              Delete Element
+              {t('editor.controlsSidebar.deleteElementBtn')}
             </button>
           )}
 
         </aside>
-
-
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { CardTemplate } from "../../types/editor";
+import { useLanguage } from "../../hooks/useLanguage";
 
 interface Props {
   templates: CardTemplate[];
@@ -6,9 +7,12 @@ interface Props {
 }
 
 export default function TemplatesPanel({ templates, onSelect }: Props) {
+
+  const { t } = useLanguage();
+
   return (
     <div className="mt-4">
-      <h3 className="font-medium mb-2">Templates</h3>
+      <h3 className="font-medium mb-2">{t('editor.controlsSidebar.controls.templates')}</h3>
 
       <div className="flex flex-col gap-6 max-h-[400px] overflow-y-auto p-2">
         {templates.map((tpl) => (

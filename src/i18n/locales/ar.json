@@ -28,13 +28,44 @@
     "cta": "ابدأ التصميم"
   },
   "editor": {
-    "title": "محرر البطاقات",
-    "preview": "معاينة",
-    "text": "النص",
-    "font": "الخط",
-    "size": "الحجم",
-    "color": "اللون",
-    "position": "الموضع"
+    "navbar": {
+      "title": "محرر البطاقات",
+      "buttonText": "تنزيل البطاقة"
+    },
+    "optionsSidebar": {
+      "addTextBtn": "نص",
+      "addStickerBtn": "ملصق",
+      "AddImageBtn": "صورة",
+      "AddBackgroundBtn": "خلفية"
+    },
+    "controlsSidebar": {
+      "title": "الإعدادات",
+      "controls": {
+        "background": "الخلفية",
+        "gradients": "تدرجات الألوان",
+        "templates": "القوالب"
+      },
+      "textControls": {
+        "fontFamily": "نوع الخط",
+        "fontSize": "حجم الخط",
+        "fontColor": "لون الخط",
+        "fontStyle": "نمط الخط",
+        "textAlignment": "محاذاة النص"
+      },
+      "stickerControls": {
+        "title": "الملصقات",
+        "filter": {
+          "firstOption": "رمضان",
+          "secondOption": "العيد"
+        }
+      },
+      "layerOptions": {
+        "forward": "إرسال إلى الأمام",
+        "backward": "إرسال إلى الخلف"
+      },
+      "DuaaTitle": "أدعية جاهزة",
+      "deleteElementBtn": "حذف العنصر"
+    }
   },
   "info": {
     "title": "عن الإسلام ورمضان",
