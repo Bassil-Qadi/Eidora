@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "../../hooks/useLanguage";
 import { StickerCategory } from "../../types/stickers";
 
 interface Props {
@@ -8,13 +9,14 @@ interface Props {
 
 export default function StickerPicker({ stickers, onSelect }: Props) {
 
+    const { t } = useLanguage();
     const [active, setActive] = useState<StickerCategory>('ramadan');
     const filtered = stickers.filter((s) => s.category === active);
 
     return (
         <div className="mt-4">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="font-medium mb-2">Stickers</h3>
+                <h3 className="font-medium mb-2">{t('editor.controlsSidebar.stickerControls.title')}</h3>
                 <div className="flex rounded-lg border bg-gray-50 p-1">
                     {(["ramadan", "eid"] as StickerCategory[]).map((cat) => (
                         <button
@@ -32,7 +34,7 @@ export default function StickerPicker({ stickers, onSelect }: Props) {
                                 }
                             `}
                         >
-                            {cat === "ramadan" ? "Ramadan" : "Eid"}
+                            {cat === "ramadan" ? t('editor.controlsSidebar.stickerControls.filter.firstOption') : t('editor.controlsSidebar.stickerControls.filter.secondOption')}
                         </button>
                     ))}
                 </div>
