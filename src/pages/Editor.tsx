@@ -81,7 +81,13 @@ const Editor = () => {
     <div className="h-screen flex flex-col bg-gray-100">
       {/* Header */}
       <header className="h-16 bg-white border-b flex items-center justify-between px-6">
-        <div className="font-semibold text-lg">Eidora</div>
+        {/* <div className="font-semibold text-lg">Eidora</div> */}
+        <div>
+            <h2 className="text-2xl font-semibold text-gold mb-0">
+              {t("ramadan.title")}
+            </h2>
+            <small className="hidden sm:block">{t("ramadan.greeting")}</small>
+          </div>
 
         <div className="text-sm text-gray-500">{t('editor.navbar.title')}</div>
 
