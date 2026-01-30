@@ -26,10 +26,10 @@ export default function TemplatesPanel({ templates, onSelect }: Props) {
               alt={tpl.name}
               className="w-full h-36 object-cover"
             />
-           <div className="w-full px-3 py-2 text-sm font-medium text-gray-800 
+            <div className="w-full px-3 py-2 text-sm font-medium text-gray-800 
                 bg-white/80 backdrop-blur border-t">
-  {tpl.name}
-</div>
+              {tpl.name}
+            </div>
           </button>
         ))}
       </div>
