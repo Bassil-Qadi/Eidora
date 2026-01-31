@@ -100,7 +100,6 @@ const Editor = () => {
 
       const dataUrl = await toPng(canvasRef.current, {
         cacheBust: true,
-        backgroundColor: '#ffffff',
         pixelRatio: 2,
       });
       const link = document.createElement("a");
