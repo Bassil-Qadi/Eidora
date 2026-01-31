@@ -72,7 +72,37 @@ const Editor = () => {
   const handleDownload = async () => {
     if (!canvasRef.current) return;
     try {
-      const dataUrl = await toPng(canvasRef.current, { cacheBust: true });
+      // Wait for all images to load before capturing
+      const images = canvasRef.current.querySelectorAll('img');
+      const imagePromises = Array.from(images).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+      });
+
+      // Also wait for background images to load
+      const backgroundImagePromises: Promise<void>[] = [];
+      if (state.previewImage) {
+        const bgImg = new Image();
+        bgImg.crossOrigin = 'anonymous';
+        backgroundImagePromises.push(
+          new Promise((resolve, reject) => {
+            bgImg.onload = () => resolve();
+            bgImg.onerror = () => resolve(); // Continue even if image fails
+            bgImg.src = state.previewImage!;
+          })
+        );
+      }
+
+      await Promise.all([...imagePromises, ...backgroundImagePromises]);
+
+      const dataUrl = await toPng(canvasRef.current, {
+        cacheBust: true,
+        backgroundColor: '#ffffff',
+        pixelRatio: 2,
+      });
       const link = document.createElement("a");
       link.download = "eid-card.png";
       link.href = dataUrl;

@@ -217,12 +217,20 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
           }}
           className={`relative ${!previewImage ? 'shadow-xl' : ''} w-[280px] h-[450px] sm:w-[320px] sm:h-[520px] md:w-[360px] md:h-[580px]`}
           style={{
-            background: previewImage
-              ? `url(${previewImage}) center/contain no-repeat`
-              : background
+            background: previewImage ? undefined : background
           }}
           onClick={() => onClearSelection()}
         >
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Template background"
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+              style={{ zIndex: 0, objectPosition: 'center' }}
+              crossOrigin="anonymous"
+            />
+          )}
+          <div className="relative w-full h-full" style={{ zIndex: 1 }}>
           {elements.map((el) => {
             // ---------- TEXT ----------
             if (el.type === "text") {
@@ -458,7 +466,7 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
 
             return null;
           })}
-
+          </div>
         </div>
       </div>
     );
