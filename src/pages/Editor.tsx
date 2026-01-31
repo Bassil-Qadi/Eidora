@@ -148,17 +148,76 @@ const Editor = () => {
       });
       
       // Mobile-friendly download
-      if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
-        // For mobile, open in new window or use share API
-        const newWindow = window.open();
-        if (newWindow) {
-          newWindow.document.write(`<img src="${dataUrl}" style="max-width: 100%; height: auto;" />`);
-          newWindow.document.close();
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // Try Web Share API first (works on modern mobile browsers)
+        if (navigator.share && navigator.canShare) {
+          try {
+            // Convert data URL to blob
+            const response = await fetch(dataUrl);
+            const blob = await response.blob();
+            const file = new File([blob], 'ramadan-card.png', { type: 'image/png' });
+            
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: 'Ramadan Card',
+              });
+              return; // Successfully shared
+            }
+          } catch (shareError) {
+            console.log('Share API failed, falling back to download:', shareError);
+            // Fall through to blob download
+          }
+        }
+        
+        // Fallback: Create blob and download
+        try {
+          const response = await fetch(dataUrl);
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          
+          const link = document.createElement("a");
+          link.href = blobUrl;
+          link.download = "ramadan-card.png";
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          
+          // Trigger download
+          link.click();
+          
+          // Clean up after a delay
+          setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(blobUrl);
+          }, 100);
+        } catch (blobError) {
+          // Last resort: open in new tab
+          const newWindow = window.open();
+          if (newWindow) {
+            newWindow.document.write(`
+              <html>
+                <head><title>Ramadan Card</title></head>
+                <body style="margin:0;padding:20px;background:#f0f0f0;display:flex;justify-content:center;align-items:center;min-height:100vh;">
+                  <div style="text-align:center;">
+                    <img src="${dataUrl}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+                    <p style="margin-top:20px;color:#666;">Long press the image to save</p>
+                  </div>
+                </body>
+              </html>
+            `);
+            newWindow.document.close();
+          } else {
+            alert("Please allow popups to download your card, or use the share button.");
+          }
         }
       } else {
+        // Desktop download
         const link = document.createElement("a");
         link.download = "ramadan-card.png";
         link.href = dataUrl;
+        link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

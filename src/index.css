@@ -30,8 +30,19 @@ html[lang="ar"] * {
   font-synthesis: none;
 }
 
-html[lang="ar"] [style*="font-family"] {
+html[lang="ar"] [style*="font-family"],
+html[lang="ar"] [style*="fontFamily"],
+html[dir="rtl"] [style*="font-family"],
+html[dir="rtl"] [style*="fontFamily"] {
   font-style: normal !important;
+  font-synthesis: none !important;
+}
+
+/* Force normal font style for all text when Arabic is active */
+html[lang="ar"] div,
+html[lang="ar"] span,
+html[lang="ar"] p {
+  font-synthesis: none;
 }
 
 a {

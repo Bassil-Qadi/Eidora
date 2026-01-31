@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, forwardRef } from "react";
 import { EditorElement, TextElement, ImageElement } from "../../types/editor";
 import { measureTextWidth } from "../../utils/measureTextWidth";
+import { useLanguage } from "../../hooks/useLanguage";
 
 interface CanvasProps {
   elements: EditorElement[];
@@ -39,6 +40,9 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
     },
     ref
   ) => {
+    const { currentLanguage } = useLanguage();
+    const isArabic = currentLanguage === 'ar';
+    
     // Refs
     const canvasRef = useRef<HTMLDivElement>(null);
     const dragStart = useRef<{
@@ -357,18 +361,15 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
                         color: text.color,
                         fontFamily: text.fontFamily,
                         fontWeight: text.bold ? "bold" : "normal",
-                        fontStyle: text.italic ? "italic" : "normal",
+                        fontStyle: (isArabic && !text.italic) ? "normal" : (text.italic ? "italic" : "normal"),
                         fontVariant: "normal", // Prevent synthetic italic on Arabic fonts
+                        fontSynthesis: "none", // Prevent browser from creating synthetic italic
                         textDecoration: text.underline ? "underline" : "none",
                         lineHeight: 1.3,
                         whiteSpace: "pre-wrap",
                         background: "transparent",
                         border: "1px dashed #999",
                         outline: "none",
-                        // Explicitly prevent italic inheritance for Arabic fonts
-                        ...(text.fontFamily && ['Cairo', 'Tajawal', 'Amiri'].includes(text.fontFamily) && !text.italic
-                          ? { fontStyle: 'normal', fontSynthesis: 'none' }
-                          : {}),
                       }}
                     />
 
@@ -379,18 +380,15 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
                         color: text.color,
                         fontFamily: text.fontFamily,
                         fontWeight: text.bold ? "bold" : "normal",
-                        fontStyle: text.italic ? "italic" : "normal",
+                        fontStyle: (isArabic && !text.italic) ? "normal" : (text.italic ? "italic" : "normal"),
                         fontVariant: "normal", // Prevent synthetic italic on Arabic fonts
+                        fontSynthesis: "none", // Prevent browser from creating synthetic italic
                         textDecoration: text.underline ? "underline" : "none",
                         width: text.width ?? 200,
                         whiteSpace: "pre-wrap",       // 👈 multiline
                         wordBreak: "break-word",      // 👈 prevent overflow
                         textAlign: text.align ?? "center",
                         lineHeight: 1.3,
-                        // Explicitly prevent italic inheritance for Arabic fonts
-                        ...(text.fontFamily && ['Cairo', 'Tajawal', 'Amiri'].includes(text.fontFamily) && !text.italic
-                          ? { fontStyle: 'normal', fontSynthesis: 'none' }
-                          : {}),
                       }}
                     >
                       {text.text}
