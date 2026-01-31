@@ -324,10 +324,19 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
                       autoFocus
                       onChange={(e) => setEditingValue(e.target.value)}
                       onBlur={() => {
+                        // Get actual canvas width for responsive measurement
+                        const getCanvasWidth = () => {
+                          if (!canvasRef.current) return 360;
+                          const rect = canvasRef.current.getBoundingClientRect();
+                          return rect.width;
+                        };
+                        
+                        const canvasWidth = getCanvasWidth();
                         const measuredWidth = measureTextWidth(
                           editingValue,
                           text.fontSize,
-                          text.fontFamily
+                          text.fontFamily,
+                          canvasWidth
                         );
 
                         onUpdate(text.id, {
@@ -349,12 +358,17 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
                         fontFamily: text.fontFamily,
                         fontWeight: text.bold ? "bold" : "normal",
                         fontStyle: text.italic ? "italic" : "normal",
+                        fontVariant: "normal", // Prevent synthetic italic on Arabic fonts
                         textDecoration: text.underline ? "underline" : "none",
                         lineHeight: 1.3,
                         whiteSpace: "pre-wrap",
                         background: "transparent",
                         border: "1px dashed #999",
                         outline: "none",
+                        // Explicitly prevent italic inheritance for Arabic fonts
+                        ...(text.fontFamily && ['Cairo', 'Tajawal', 'Amiri'].includes(text.fontFamily) && !text.italic
+                          ? { fontStyle: 'normal', fontSynthesis: 'none' }
+                          : {}),
                       }}
                     />
 
@@ -366,12 +380,17 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
                         fontFamily: text.fontFamily,
                         fontWeight: text.bold ? "bold" : "normal",
                         fontStyle: text.italic ? "italic" : "normal",
+                        fontVariant: "normal", // Prevent synthetic italic on Arabic fonts
                         textDecoration: text.underline ? "underline" : "none",
                         width: text.width ?? 200,
                         whiteSpace: "pre-wrap",       // 👈 multiline
                         wordBreak: "break-word",      // 👈 prevent overflow
                         textAlign: text.align ?? "center",
                         lineHeight: 1.3,
+                        // Explicitly prevent italic inheritance for Arabic fonts
+                        ...(text.fontFamily && ['Cairo', 'Tajawal', 'Amiri'].includes(text.fontFamily) && !text.italic
+                          ? { fontStyle: 'normal', fontSynthesis: 'none' }
+                          : {}),
                       }}
                     >
                       {text.text}

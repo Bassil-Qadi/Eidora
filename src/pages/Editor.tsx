@@ -72,13 +72,35 @@ const Editor = () => {
   const handleDownload = async () => {
     if (!canvasRef.current) return;
     try {
-      // Wait for all images to load before capturing
+      // Wait for all images to load before capturing (with timeout and error handling)
       const images = canvasRef.current.querySelectorAll('img');
       const imagePromises = Array.from(images).map((img) => {
-        if (img.complete) return Promise.resolve();
-        return new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        
+        return Promise.race([
+          new Promise<void>((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('Image load timeout'));
+            }, 10000); // 10 second timeout
+            
+            img.onload = () => {
+              clearTimeout(timeout);
+              resolve();
+            };
+            img.onerror = () => {
+              clearTimeout(timeout);
+              reject(new Error('Image failed to load'));
+            };
+          }),
+          new Promise<void>((resolve) => {
+            // If image is already loaded but not detected, resolve immediately
+            setTimeout(() => {
+              if (img.complete) resolve();
+            }, 100);
+          })
+        ]).catch(() => {
+          // Continue even if individual images fail
+          console.warn('Image failed to load, continuing with download');
         });
       });
 
@@ -88,26 +110,62 @@ const Editor = () => {
         const bgImg = new Image();
         bgImg.crossOrigin = 'anonymous';
         backgroundImagePromises.push(
-          new Promise((resolve, reject) => {
-            bgImg.onload = () => resolve();
-            bgImg.onerror = () => resolve(); // Continue even if image fails
-            bgImg.src = state.previewImage!;
+          Promise.race([
+            new Promise<void>((resolve, reject) => {
+              const timeout = setTimeout(() => {
+                reject(new Error('Background image timeout'));
+              }, 10000);
+              
+              bgImg.onload = () => {
+                clearTimeout(timeout);
+                resolve();
+              };
+              bgImg.onerror = () => {
+                clearTimeout(timeout);
+                resolve(); // Continue even if background image fails
+              };
+              bgImg.src = state.previewImage!;
+            }),
+            new Promise<void>((resolve) => {
+              setTimeout(() => resolve(), 100);
+            })
+          ]).catch(() => {
+            // Continue even if background image fails
+            console.warn('Background image failed to load, continuing with download');
           })
         );
       }
 
-      await Promise.all([...imagePromises, ...backgroundImagePromises]);
+      // Wait for all images with a maximum timeout
+      await Promise.race([
+        Promise.all([...imagePromises, ...backgroundImagePromises]),
+        new Promise((resolve) => setTimeout(resolve, 12000)) // Max 12 seconds total
+      ]);
 
       const dataUrl = await toPng(canvasRef.current, {
         cacheBust: true,
         pixelRatio: 2,
       });
-      const link = document.createElement("a");
-      link.download = "eid-card.png";
-      link.href = dataUrl;
-      link.click();
+      
+      // Mobile-friendly download
+      if (navigator.userAgent.match(/iPhone|iPad|iPod|Android/i)) {
+        // For mobile, open in new window or use share API
+        const newWindow = window.open();
+        if (newWindow) {
+          newWindow.document.write(`<img src="${dataUrl}" style="max-width: 100%; height: auto;" />`);
+          newWindow.document.close();
+        }
+      } else {
+        const link = document.createElement("a");
+        link.download = "ramadan-card.png";
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (err) {
       console.error("Failed to download image:", err);
+      alert("Failed to download card. Please try again.");
     }
   };
 

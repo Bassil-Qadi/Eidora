@@ -21,12 +21,23 @@ export default function TextControls({ text, onChange }: Props) {
 
   const { t } = useLanguage();
   const alignHorizontal = (pos: "left" | "center" | "right") => {
-    const canvasWidth = 360; // SAME as your canvas width
+    // Get actual canvas width from viewport (responsive)
+    const getCanvasWidth = () => {
+      if (typeof window === 'undefined') return 360;
+      const width = window.innerWidth;
+      if (width < 640) return 280; // mobile
+      if (width < 768) return 320; // sm
+      return 360; // md+
+    };
+    
+    const canvasWidth = getCanvasWidth();
     const paddingPx = 12;
   
     const textWidthPx = measureTextWidth(
       text.text,
-      text.fontSize
+      text.fontSize,
+      text.fontFamily,
+      canvasWidth
     );
   
     const textWidthPercent = (textWidthPx / canvasWidth) * 100;

@@ -259,8 +259,13 @@ export const useEditor = () => {
           const textHeightPx =
             textEl.fontSize * 1.3 * (textEl.text.split("\n").length || 1);
 
-          const wPercent = (textWidthPx / 360) * 100;
-          const hPercent = (textHeightPx / 520) * 100;
+          // Use responsive canvas dimensions (default to desktop, but will be adjusted by actual canvas)
+          // Canvas sizes: mobile 280x450, sm 320x520, md+ 360x580
+          const canvasWidth = 360; // Base width for percentage calculations
+          const canvasHeight = 580; // Base height for percentage calculations
+          
+          const wPercent = (textWidthPx / canvasWidth) * 100;
+          const hPercent = (textHeightPx / canvasHeight) * 100;
 
           return {
             ...textEl,
@@ -271,8 +276,10 @@ export const useEditor = () => {
 
         if (el.type === "sticker" || el.type === "image") {
           const imgEl = el as ImageElement;
-          const wPercent = (imgEl.width / 360) * 100;
-          const hPercent = (imgEl.height / 520) * 100;
+          const canvasWidth = 360;
+          const canvasHeight = 580;
+          const wPercent = (imgEl.width / canvasWidth) * 100;
+          const hPercent = (imgEl.height / canvasHeight) * 100;
 
           return {
             ...imgEl,

@@ -21,6 +21,17 @@
 
 [dir="rtl"] * {
   text-align: inherit;
+  /* Prevent synthetic italic on Arabic fonts */
+  font-synthesis: none;
+}
+
+/* Ensure Arabic fonts don't appear italic */
+html[lang="ar"] * {
+  font-synthesis: none;
+}
+
+html[lang="ar"] [style*="font-family"] {
+  font-style: normal !important;
 }
 
 a {
