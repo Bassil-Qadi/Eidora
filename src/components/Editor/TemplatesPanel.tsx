@@ -12,9 +12,9 @@ export default function TemplatesPanel({ templates, onSelect }: Props) {
 
   return (
     <div className="mt-4">
-      <h3 className="font-medium mb-2">{t('editor.controlsSidebar.controls.templates')}</h3>
+      <h3 className="text-xs sm:text-sm font-medium mb-2">{t('editor.controlsSidebar.controls.templates')}</h3>
 
-      <div className="flex flex-col gap-6 max-h-[400px] overflow-y-auto p-2">
+      <div className="flex flex-col gap-4 sm:gap-6 max-h-[300px] sm:max-h-[400px] overflow-y-auto p-2">
         {templates.map((tpl) => (
           <button
             key={tpl.id}
@@ -24,9 +24,9 @@ export default function TemplatesPanel({ templates, onSelect }: Props) {
             <img
               src={tpl.preview}
               alt={tpl.name}
-              className="w-full h-36 object-cover"
+              className="w-full h-24 sm:h-36 object-cover"
             />
-            <div className="w-full px-3 py-2 text-sm font-medium text-gray-800 
+            <div className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-800 
                 bg-white/80 backdrop-blur border-t">
               {tpl.name}
             </div>

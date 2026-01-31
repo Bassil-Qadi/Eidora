@@ -14,10 +14,10 @@ export default function DuaBar({ duas, onSelect }: Props) {
   const filtered = duas.filter((d) => d.category === active);
 
   return (
-    <div>
+    <div className="w-full">
       {/* Header + Filter */}
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-medium text-gray-600">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2 sm:gap-0">
+        <h4 className="text-xs sm:text-sm font-medium text-gray-600">
           {t('editor.controlsSidebar.DuaaTitle')}
         </h4>
 
@@ -27,7 +27,7 @@ export default function DuaBar({ duas, onSelect }: Props) {
               key={cat}
               onClick={() => setActive(cat)}
               className={`
-                px-3
+                px-2 sm:px-3
                 py-1
                 text-xs
                 rounded-md
@@ -46,7 +46,7 @@ export default function DuaBar({ duas, onSelect }: Props) {
       </div>
 
       {/* Duas */}
-      <div className="flex gap-3 overflow-x-auto pb-2 pt-2 scrollbar-hide">
+      <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 pt-2 scrollbar-hide -mx-2 sm:mx-0 px-2 sm:px-0">
         {filtered.map((dua, idx) => (
           <button
             key={idx}
@@ -54,15 +54,15 @@ export default function DuaBar({ duas, onSelect }: Props) {
             style={{ fontFamily: 'Tajawal' }}
             className="
               shrink-0
-              max-w-[280px]
-              px-4
-              py-3
+              max-w-[200px] sm:max-w-[280px]
+              px-3 sm:px-4
+              py-2 sm:py-3
               rounded-xl
               bg-white
               border
               border-gray-200
               text-gray-800
-              text-sm
+              text-xs sm:text-sm
               leading-relaxed
               text-center
               hover:border-yellow-400

@@ -42,8 +42,8 @@ interface SidebarButtonProps {
       <button
         onClick={onClick}
         className={`
-          w-16 h-16
-          px-10
+          w-14 h-14 sm:w-16 sm:h-16
+          px-8 sm:px-10
           flex flex-col items-center justify-center gap-1
           rounded-xl
           transition-all
@@ -53,8 +53,8 @@ interface SidebarButtonProps {
           active:scale-95
         `}
       >
-        <div className={`text-xl ${c.icon}`}>{icon}</div>
-        <span className="text-[11px] font-medium text-gray-700">
+        <div className={`text-lg sm:text-xl ${c.icon}`}>{icon}</div>
+        <span className="text-[10px] sm:text-[11px] font-medium text-gray-700">
           {label}
         </span>
       </button>

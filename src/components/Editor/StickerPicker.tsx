@@ -15,15 +15,15 @@ export default function StickerPicker({ stickers, onSelect }: Props) {
 
     return (
         <div className="mt-4">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="font-medium mb-2">{t('editor.controlsSidebar.stickerControls.title')}</h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-0">
+                <h3 className="text-xs sm:text-sm font-medium">{t('editor.controlsSidebar.stickerControls.title')}</h3>
                 <div className="flex rounded-lg border bg-gray-50 p-1">
                     {(["ramadan", "eid"] as StickerCategory[]).map((cat) => (
                         <button
                             key={cat}
                             onClick={() => setActive(cat)}
                             className={`
-                                px-3
+                                px-2 sm:px-3
                                 py-1
                                 text-xs
                                 rounded-md
@@ -41,8 +41,8 @@ export default function StickerPicker({ stickers, onSelect }: Props) {
             </div>
             <div
                 className={`
-                    flex flex-col gap-3
-                    max-h-[400px]
+                    grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-3
+                    max-h-[300px] sm:max-h-[400px]
                     overflow-y-auto
                     pr-1
                 `}
@@ -63,8 +63,7 @@ export default function StickerPicker({ stickers, onSelect }: Props) {
                         <img
                             src={sticker.src}
                             alt=""
-                            className={`mx-auto object-contain w-24 h-24'
-                                }`}
+                            className="mx-auto object-contain w-16 h-16 sm:w-24 sm:h-24"
                         />
                     </button>
                 ))}

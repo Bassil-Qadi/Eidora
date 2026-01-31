@@ -208,14 +208,14 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
     
 
     return (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center w-full">
         <div
           ref={(node) => {
             canvasRef.current = node;
             if (typeof ref === "function") ref(node);
             else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
           }}
-          className={`relative ${!previewImage ? 'shadow-xl' : ''} w-[360px] h-[580px]`}
+          className={`relative ${!previewImage ? 'shadow-xl' : ''} w-[280px] h-[450px] sm:w-[320px] sm:h-[520px] md:w-[360px] md:h-[580px]`}
           style={{
             background: previewImage
               ? `url(${previewImage}) center/contain no-repeat`
