@@ -53,6 +53,15 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
       startWidth: number;
     } | null>(null);
 
+    // Helper to get coordinates from mouse or touch event
+    const getEventCoords = (e: React.MouseEvent | React.TouchEvent) => {
+      if ('touches' in e && e.touches.length > 0) {
+        return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+      }
+      const mouseEvent = e as React.MouseEvent;
+      return { clientX: mouseEvent.clientX, clientY: mouseEvent.clientY };
+    };
+
     // State
     const [draggingId, setDraggingId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -61,9 +70,23 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
     const [rotatingId, setRotatingId] = useState<string | null>(null);
     const [resizingTextId, setResizingTextId] = useState<string | null>(null);
 
-    // Dragging
+    // Dragging - unified handler for mouse and touch
     useEffect(() => {
-      const handleMouseMove = (e: MouseEvent) => {
+      const getClientCoords = (e: MouseEvent | TouchEvent) => {
+        if ('touches' in e && e.touches.length > 0) {
+          return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+        }
+        return { clientX: (e as MouseEvent).clientX, clientY: (e as MouseEvent).clientY };
+      };
+
+      const handleMove = (e: MouseEvent | TouchEvent) => {
+        // Prevent scrolling on touch devices when dragging/resizing
+        if ('touches' in e && (draggingId || resizingId || rotatingId || resizingTextId)) {
+          e.preventDefault();
+        }
+
+        const { clientX, clientY } = getClientCoords(e);
+
         // ROTATION LOGIC
         if (rotatingId && rotateStart.current) {
           if (!rotatingId || !rotateStart.current) return;
@@ -71,8 +94,8 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
           const { centerX, centerY, startAngle } = rotateStart.current;
 
           const currentAngle = Math.atan2(
-            e.clientY - centerY,
-            e.clientX - centerX
+            clientY - centerY,
+            clientX - centerX
           );
 
           const delta = currentAngle - startAngle;
@@ -81,10 +104,10 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
           onRotate(rotatingId, rotation);
         }
 
-        // RESIZE LOGIC (already exists)
+        // RESIZE LOGIC
         if (resizingId && resizeStart.current) {
-          const dx = e.clientX - resizeStart.current.x;
-          const dy = e.clientY - resizeStart.current.y;
+          const dx = clientX - resizeStart.current.x;
+          const dy = clientY - resizeStart.current.y;
           const scale = Math.max(
             (resizeStart.current.w + dx) / resizeStart.current.w,
             (resizeStart.current.h + dy) / resizeStart.current.h
@@ -99,22 +122,14 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
         }
 
         if (resizingTextId && textResizeStart.current) {
-          const dx = e.clientX - textResizeStart.current.startX;
+          const dx = clientX - textResizeStart.current.startX;
           const newWidth = Math.max(80, textResizeStart.current.startWidth + dx);
 
           onUpdate(resizingTextId, { width: newWidth });
           return;
         }
 
-        if (resizingTextId && textResizeStart.current) {
-          const dx = e.clientX - textResizeStart.current.startX;
-          const newWidth = Math.max(80, textResizeStart.current.startWidth + dx);
-
-          onUpdate(resizingTextId, { width: newWidth });
-          return;
-        }
-
-        // DRAG LOGIC (already exists)
+        // DRAG LOGIC
         if (
           !draggingId ||
           !canvasRef.current ||
@@ -126,9 +141,9 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
         const rect = canvasRef.current.getBoundingClientRect();
 
         const dx =
-          ((e.clientX - dragStart.current.mouseX) / rect.width) * 100;
+          ((clientX - dragStart.current.mouseX) / rect.width) * 100;
         const dy =
-          ((e.clientY - dragStart.current.mouseY) / rect.height) * 100;
+          ((clientY - dragStart.current.mouseY) / rect.height) * 100;
 
         Object.entries(dragStart.current.elements).forEach(
           ([id, startPos]) => {
@@ -142,10 +157,9 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
             onMove(id, x, y);
           }
         );
-
       };
 
-      const handleMouseUp = () => {
+      const handleEnd = () => {
         setDraggingId(null);
         setResizingId(null);
         setRotatingId(null);
@@ -154,17 +168,23 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
         dragStart.current = null;
         rotateStart.current = null;
         textResizeStart.current = null;
-
+        resizeStart.current = null;
       };
 
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("mousemove", handleMove);
+      window.addEventListener("mouseup", handleEnd);
+      window.addEventListener("touchmove", handleMove, { passive: false });
+      window.addEventListener("touchend", handleEnd);
+      window.addEventListener("touchcancel", handleEnd);
 
       return () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
+        window.removeEventListener("mousemove", handleMove);
+        window.removeEventListener("mouseup", handleEnd);
+        window.removeEventListener("touchmove", handleMove);
+        window.removeEventListener("touchend", handleEnd);
+        window.removeEventListener("touchcancel", handleEnd);
       };
-    }, [draggingId, editingId, resizingId, onMove, onResize]);
+    }, [draggingId, editingId, resizingId, rotatingId, resizingTextId, onMove, onResize, onRotate, onUpdate]);
 
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -255,9 +275,29 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
                     e.stopPropagation();
                     if (editingId) return;
 
+                    const coords = getEventCoords(e);
                     dragStart.current = {
-                      mouseX: e.clientX,
-                      mouseY: e.clientY,
+                      mouseX: coords.clientX,
+                      mouseY: coords.clientY,
+                      elements: Object.fromEntries(
+                        selectedElementIds.includes(text.id)
+                          ? elements
+                            .filter((el) => selectedElementIds.includes(el.id))
+                            .map((el) => [el.id, { x: el.x, y: el.y }])
+                          : [[text.id, { x: text.x, y: text.y }]]
+                      ),
+                    };
+
+                    setDraggingId(text.id);
+                  }}
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    if (editingId) return;
+
+                    const coords = getEventCoords(e);
+                    dragStart.current = {
+                      mouseX: coords.clientX,
+                      mouseY: coords.clientY,
                       elements: Object.fromEntries(
                         selectedElementIds.includes(text.id)
                           ? elements
@@ -345,8 +385,23 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
 
                         onSelect(text.id); // 👈 IMPORTANT
 
+                        const coords = getEventCoords(e);
                         textResizeStart.current = {
-                          startX: e.clientX,
+                          startX: coords.clientX,
+                          startWidth: text.width ?? 200,
+                        };
+
+                        setResizingTextId(text.id);
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+
+                        onSelect(text.id);
+
+                        const coords = getEventCoords(e);
+                        textResizeStart.current = {
+                          startX: coords.clientX,
                           startWidth: text.width ?? 200,
                         };
 
@@ -389,9 +444,29 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
                     e.stopPropagation();
                     if (editingId) return;
 
+                    const coords = getEventCoords(e);
                     dragStart.current = {
-                      mouseX: e.clientX,
-                      mouseY: e.clientY,
+                      mouseX: coords.clientX,
+                      mouseY: coords.clientY,
+                      elements: Object.fromEntries(
+                        selectedElementIds.includes(el.id)
+                          ? elements
+                            .filter((el) => selectedElementIds.includes(el.id))
+                            .map((el) => [el.id, { x: el.x, y: el.y }])
+                          : [[el.id, { x: el.x, y: el.y }]]
+                      ),
+                    };
+
+                    setDraggingId(el.id);
+                  }}
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    if (editingId) return;
+
+                    const coords = getEventCoords(e);
+                    dragStart.current = {
+                      mouseX: coords.clientX,
+                      mouseY: coords.clientY,
                       elements: Object.fromEntries(
                         selectedElementIds.includes(el.id)
                           ? elements
@@ -425,9 +500,22 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
                         onMouseDown={(e) => {
                           e.stopPropagation();
                           setResizingId(sticker.id);
+                          const coords = getEventCoords(e);
                           resizeStart.current = {
-                            x: e.clientX,
-                            y: e.clientY,
+                            x: coords.clientX,
+                            y: coords.clientY,
+                            w: sticker.width,
+                            h: sticker.height,
+                          };
+                        }}
+                        onTouchStart={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setResizingId(sticker.id);
+                          const coords = getEventCoords(e);
+                          resizeStart.current = {
+                            x: coords.clientX,
+                            y: coords.clientY,
                             w: sticker.width,
                             h: sticker.height,
                           };
@@ -442,12 +530,33 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
 
                           const rect = canvasRef.current!.getBoundingClientRect();
                           const elRect = e.currentTarget.parentElement!.getBoundingClientRect();
+                          const coords = getEventCoords(e);
 
                           const centerX = elRect.left + elRect.width / 2;
                           const centerY = elRect.top + elRect.height / 2;
 
                           rotateStart.current = {
-                            startAngle: Math.atan2(e.clientY - centerY, e.clientX - centerX),
+                            startAngle: Math.atan2(coords.clientY - centerY, coords.clientX - centerX),
+                            centerX,
+                            centerY,
+                          };
+
+                          setRotatingId(sticker.id);
+                          onSelect(sticker.id);
+                        }}
+                        onTouchStart={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+
+                          const rect = canvasRef.current!.getBoundingClientRect();
+                          const elRect = e.currentTarget.parentElement!.getBoundingClientRect();
+                          const coords = getEventCoords(e);
+
+                          const centerX = elRect.left + elRect.width / 2;
+                          const centerY = elRect.top + elRect.height / 2;
+
+                          rotateStart.current = {
+                            startAngle: Math.atan2(coords.clientY - centerY, coords.clientX - centerX),
                             centerX,
                             centerY,
                           };
