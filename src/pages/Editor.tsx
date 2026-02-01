@@ -70,146 +70,29 @@ const Editor = () => {
       
 
   const handleDownload = async () => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) {
+      console.error('Canvas ref is not available');
+      return;
+    }
+
     try {
-      // Simple function to wait for an image to load
-      const waitForImage = (img: HTMLImageElement): Promise<void> => {
-        return new Promise((resolve) => {
-          // Check if already loaded
-          if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
-            resolve();
-            return;
-          }
-          
-          // Wait for load or error
-          const timeout = setTimeout(() => resolve(), 10000);
-          const cleanup = () => {
-            clearTimeout(timeout);
-            img.removeEventListener('load', onLoad);
-            img.removeEventListener('error', onError);
-          };
-          
-          const onLoad = () => {
-            cleanup();
-            resolve();
-          };
-          
-          const onError = () => {
-            cleanup();
-            resolve(); // Continue even if image fails
-          };
-          
-          img.addEventListener('load', onLoad, { once: true });
-          img.addEventListener('error', onError, { once: true });
-        });
-      };
-
-      // If template background exists, ensure it's rendered in DOM
-      if (state.previewImage) {
-        // Wait for React to render
-        await new Promise(resolve => setTimeout(resolve, 50));
-      }
-
-      // Get all images from canvas
-      let images = canvasRef.current.querySelectorAll('img');
-      
-      // If template exists but no images found, wait a bit more
-      if (state.previewImage && images.length === 0) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        images = canvasRef.current.querySelectorAll('img');
-      }
-
-      // Wait for all images to load
-      if (images.length > 0) {
-        await Promise.all(Array.from(images).map(img => waitForImage(img as HTMLImageElement)));
-      }
-      
-      // Small delay to ensure browser has painted everything
-      await new Promise(resolve => setTimeout(resolve, 150));
-
+      // Convert canvas to PNG image
       const dataUrl = await toPng(canvasRef.current, {
+        quality: 1.0,
+        pixelRatio: 2, // Higher quality for better image resolution
         cacheBust: true,
-        pixelRatio: 2,
       });
-      
-      // Mobile-friendly download
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      
-      if (isMobile) {
-        // Try Web Share API first (works on modern mobile browsers)
-        if (navigator.share && navigator.canShare) {
-          try {
-            // Convert data URL to blob
-            const response = await fetch(dataUrl);
-            const blob = await response.blob();
-            const file = new File([blob], 'ramadan-card.png', { type: 'image/png' });
-            
-            if (navigator.canShare({ files: [file] })) {
-              await navigator.share({
-                files: [file],
-                title: 'Ramadan Card',
-              });
-              return; // Successfully shared
-            }
-          } catch (shareError) {
-            console.log('Share API failed, falling back to download:', shareError);
-            // Fall through to blob download
-          }
-        }
-        
-        // Fallback: Create blob and download
-        try {
-          const response = await fetch(dataUrl);
-          const blob = await response.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          
-          const link = document.createElement("a");
-          link.href = blobUrl;
-          link.download = "ramadan-card.png";
-          link.style.display = 'none';
-          document.body.appendChild(link);
-          
-          // Trigger download
-          link.click();
-          
-          // Clean up after a delay
-          setTimeout(() => {
-            document.body.removeChild(link);
-            URL.revokeObjectURL(blobUrl);
-          }, 100);
-        } catch (blobError) {
-          // Last resort: open in new tab
-          const newWindow = window.open();
-          if (newWindow) {
-            newWindow.document.write(`
-              <html>
-                <head><title>Ramadan Card</title></head>
-                <body style="margin:0;padding:20px;background:#f0f0f0;display:flex;justify-content:center;align-items:center;min-height:100vh;">
-                  <div style="text-align:center;">
-                    <img src="${dataUrl}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
-                    <p style="margin-top:20px;color:#666;">Long press the image to save</p>
-                  </div>
-                </body>
-              </html>
-            `);
-            newWindow.document.close();
-          } else {
-            alert("Please allow popups to download your card, or use the share button.");
-          }
-        }
-      } else {
-        // Desktop download
-        const link = document.createElement("a");
-        link.download = "ramadan-card.png";
-        link.href = dataUrl;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    } catch (err) {
-      console.error("Failed to download image:", err);
-      alert("Failed to download card. Please try again.");
+
+      // Create a temporary link element and trigger download
+      const link = document.createElement('a');
+      link.download = `ramadan-card-${Date.now()}.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      alert('Failed to download image. Please try again.');
     }
   };
 
