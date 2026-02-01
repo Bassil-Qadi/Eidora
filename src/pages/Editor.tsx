@@ -72,109 +72,60 @@ const Editor = () => {
   const handleDownload = async () => {
     if (!canvasRef.current) return;
     try {
-      // If template background exists, ensure it's in the DOM
-      if (state.previewImage) {
-        // Wait a bit for React to render the image if it was just added
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      
-      // Wait for all images to load before capturing (with timeout and error handling)
-      let images = canvasRef.current.querySelectorAll('img');
-      
-      // If no images found but previewImage exists, wait a bit more and retry
-      if (images.length === 0 && state.previewImage) {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        // Try again
-        images = canvasRef.current.querySelectorAll('img');
-      }
-      
-      // Create promises for all images including the template background
-      const imagePromises = Array.from(images).map((img) => {
-        // Check if image is already loaded
-        if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
-          return Promise.resolve();
-        }
-        
-        // Wait for image to load
-        return new Promise<void>((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            // If timeout, check if image loaded anyway
-            if (img.complete && img.naturalWidth > 0) {
-              resolve();
-            } else {
-              reject(new Error('Image load timeout'));
-            }
-          }, 15000); // 15 second timeout
+      // Simple function to wait for an image to load
+      const waitForImage = (img: HTMLImageElement): Promise<void> => {
+        return new Promise((resolve) => {
+          // Check if already loaded
+          if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+            resolve();
+            return;
+          }
           
-          // If image loads successfully
+          // Wait for load or error
+          const timeout = setTimeout(() => resolve(), 10000);
+          const cleanup = () => {
+            clearTimeout(timeout);
+            img.removeEventListener('load', onLoad);
+            img.removeEventListener('error', onError);
+          };
+          
           const onLoad = () => {
-            clearTimeout(timeout);
-            img.removeEventListener('load', onLoad);
-            img.removeEventListener('error', onError);
+            cleanup();
             resolve();
           };
           
-          // If image fails to load
           const onError = () => {
-            clearTimeout(timeout);
-            img.removeEventListener('load', onLoad);
-            img.removeEventListener('error', onError);
-            // Continue even if image fails (might be CORS issue)
-            console.warn('Image failed to load, continuing with download');
-            resolve();
+            cleanup();
+            resolve(); // Continue even if image fails
           };
           
-          // Add event listeners
           img.addEventListener('load', onLoad, { once: true });
           img.addEventListener('error', onError, { once: true });
-          
-          // If image loads before listeners are attached
-          if (img.complete && img.naturalWidth > 0) {
-            clearTimeout(timeout);
-            img.removeEventListener('load', onLoad);
-            img.removeEventListener('error', onError);
-            resolve();
-          }
         });
-      });
+      };
+
+      // If template background exists, ensure it's rendered in DOM
+      if (state.previewImage) {
+        // Wait for React to render
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+
+      // Get all images from canvas
+      let images = canvasRef.current.querySelectorAll('img');
+      
+      // If template exists but no images found, wait a bit more
+      if (state.previewImage && images.length === 0) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        images = canvasRef.current.querySelectorAll('img');
+      }
 
       // Wait for all images to load
-      if (imagePromises.length > 0) {
-        await Promise.all(imagePromises);
+      if (images.length > 0) {
+        await Promise.all(Array.from(images).map(img => waitForImage(img as HTMLImageElement)));
       }
       
-      // Additional verification: Check if template background image is loaded
-      if (state.previewImage) {
-        const bgImage = canvasRef.current.querySelector('img[alt="Template background"]') as HTMLImageElement;
-        if (bgImage) {
-          // Wait for this specific image to be fully loaded
-          if (!bgImage.complete || bgImage.naturalWidth === 0) {
-            await new Promise<void>((resolve) => {
-              const timeout = setTimeout(() => resolve(), 5000);
-              const onLoad = () => {
-                clearTimeout(timeout);
-                bgImage.removeEventListener('load', onLoad);
-                bgImage.removeEventListener('error', onLoad);
-                resolve();
-              };
-              bgImage.addEventListener('load', onLoad, { once: true });
-              bgImage.addEventListener('error', onLoad, { once: true });
-              
-              // If already loaded
-              if (bgImage.complete && bgImage.naturalWidth > 0) {
-                clearTimeout(timeout);
-                bgImage.removeEventListener('load', onLoad);
-                bgImage.removeEventListener('error', onLoad);
-                resolve();
-              }
-            });
-          }
-        }
-      }
-      
-      // Additional wait to ensure images are fully rendered in the DOM
-      // This is especially important for template backgrounds
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Small delay to ensure browser has painted everything
+      await new Promise(resolve => setTimeout(resolve, 150));
 
       const dataUrl = await toPng(canvasRef.current, {
         cacheBust: true,
