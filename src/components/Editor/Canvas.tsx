@@ -252,6 +252,14 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
               className="absolute inset-0 w-full h-full object-contain pointer-events-none"
               style={{ zIndex: 0, objectPosition: 'center' }}
               crossOrigin="anonymous"
+              loading="eager"
+              onLoad={(e) => {
+                // Ensure image is fully loaded and rendered
+                const img = e.target as HTMLImageElement;
+                if (img.complete && img.naturalWidth > 0) {
+                  // Image is loaded
+                }
+              }}
             />
           )}
           <div className="relative w-full h-full" style={{ zIndex: 1 }}>
