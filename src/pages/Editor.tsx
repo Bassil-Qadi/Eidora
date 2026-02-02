@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { toPng } from "html-to-image";
-import Canvas from "../components/Editor/Canvas";
+import Canvas, { CanvasHandle } from "../components/Editor/Canvas";
 import TextControls from "../components/Editor/TextControls";
 import BackgroundControls from "../components/Editor/BackgroundControls";
 import TemplatesPanel from '../components/Editor/TemplatesPanel';
@@ -21,7 +21,7 @@ import UndoRedoContainer from '../components/UI/UndoRedoContainer';
 
 const Editor = () => {
 
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement & CanvasHandle>(null);
   const { t } = useLanguage();
   const { state, addText, selectElement, clearSelection, updateTextElement, moveElement, addSticker, resizeElement, rotateElement, deleteSelected, setBackground, bringForward, sendBackward, applyTemplate, addDuaText, undo, redo, duplicateSelected, canRedo, canUndo } = useEditor();
   const [showStickers, setShowStickers] = useState(false);
@@ -76,6 +76,15 @@ const Editor = () => {
     }
 
     try {
+      // Wait for all images to be fully loaded before downloading
+      // This is especially important on mobile devices where images may not be cached
+      if (canvasRef.current.waitForImages) {
+        await canvasRef.current.waitForImages();
+      }
+
+      // Small delay to ensure DOM is fully rendered after images load
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Convert canvas to PNG image
       const dataUrl = await toPng(canvasRef.current, {
         quality: 1.0,

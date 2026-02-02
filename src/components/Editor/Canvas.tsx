@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, forwardRef } from "react";
+import { useRef, useState, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
 import { EditorElement, TextElement, ImageElement } from "../../types/editor";
 import { measureTextWidth } from "../../utils/measureTextWidth";
 import { useLanguage } from "../../hooks/useLanguage";
@@ -19,9 +19,13 @@ interface CanvasProps {
   previewImage?: string;
 }
 
+export interface CanvasHandle {
+  waitForImages: () => Promise<void>;
+}
+
 const SNAP_THRESHOLD = 1.5;
 
-const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
+const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
   (
     {
       elements,
@@ -45,6 +49,7 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
     
     // Refs
     const canvasRef = useRef<HTMLDivElement>(null);
+    const previewImageRef = useRef<HTMLImageElement | null>(null);
     const dragStart = useRef<{
       mouseX: number;
       mouseY: number;
@@ -73,6 +78,107 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
     const [resizingId, setResizingId] = useState<string | null>(null);
     const [rotatingId, setRotatingId] = useState<string | null>(null);
     const [resizingTextId, setResizingTextId] = useState<string | null>(null);
+
+    // Helper function to wait for all images to load
+    const waitForImages = useCallback(async () => {
+      const promises: Promise<void>[] = [];
+
+      // Wait for preview image
+      if (previewImage && previewImageRef.current) {
+        const img = previewImageRef.current;
+        if (!img.complete || img.naturalWidth === 0) {
+          promises.push(
+            new Promise<void>((resolve) => {
+              const onLoad = () => {
+                img.removeEventListener('load', onLoad);
+                img.removeEventListener('error', onError);
+                resolve();
+              };
+              const onError = () => {
+                img.removeEventListener('load', onLoad);
+                img.removeEventListener('error', onError);
+                resolve(); // Resolve even on error to not block download
+              };
+              img.addEventListener('load', onLoad);
+              img.addEventListener('error', onError);
+            })
+          );
+        }
+      }
+
+      // Wait for all sticker/image elements in the DOM
+      if (canvasRef.current) {
+        const imageElements = canvasRef.current.querySelectorAll('img');
+        imageElements.forEach((img) => {
+          if (!img.complete || img.naturalWidth === 0) {
+            promises.push(
+              new Promise<void>((resolve) => {
+                const onLoad = () => {
+                  img.removeEventListener('load', onLoad);
+                  img.removeEventListener('error', onError);
+                  resolve();
+                };
+                const onError = () => {
+                  img.removeEventListener('load', onLoad);
+                  img.removeEventListener('error', onError);
+                  resolve(); // Resolve even on error to not block download
+                };
+                img.addEventListener('load', onLoad);
+                img.addEventListener('error', onError);
+              })
+            );
+          }
+        });
+      }
+
+      // Also preload images that might not be in DOM yet (fallback)
+      const imageElements = elements.filter(
+        (el) => el.type === 'sticker' || el.type === 'image'
+      ) as ImageElement[];
+
+      imageElements.forEach((el) => {
+        // Check if this image is already in the DOM
+        const existingImg = canvasRef.current?.querySelector(`img[src="${el.src}"]`);
+        if (!existingImg) {
+          // Preload if not in DOM
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          promises.push(
+            new Promise<void>((resolve) => {
+              const onLoad = () => {
+                img.removeEventListener('load', onLoad);
+                img.removeEventListener('error', onError);
+                resolve();
+              };
+              const onError = () => {
+                img.removeEventListener('load', onLoad);
+                img.removeEventListener('error', onError);
+                resolve(); // Resolve even on error to not block download
+              };
+              img.addEventListener('load', onLoad);
+              img.addEventListener('error', onError);
+              img.src = el.src;
+            })
+          );
+        }
+      });
+
+      // Wait for all images to load, with a timeout
+      await Promise.race([
+        Promise.all(promises),
+        new Promise<void>((resolve) => setTimeout(resolve, 5000)) // 5 second timeout
+      ]);
+    }, [previewImage, elements]);
+
+    // Expose method to wait for all images to load
+    useImperativeHandle(ref, () => {
+      if (!canvasRef.current) {
+        return null as any;
+      }
+      return Object.assign(canvasRef.current, {
+        waitForImages,
+      }) as HTMLDivElement & CanvasHandle;
+    }, [waitForImages]);
 
     // Dragging - unified handler for mouse and touch
     useEffect(() => {
@@ -236,8 +342,11 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
         <div
           ref={(node) => {
             canvasRef.current = node;
-            if (typeof ref === "function") ref(node);
-            else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            if (typeof ref === "function") {
+              ref(node as HTMLDivElement & CanvasHandle);
+            } else if (ref) {
+              (ref as React.MutableRefObject<HTMLDivElement & CanvasHandle | null>).current = node as HTMLDivElement & CanvasHandle;
+            }
           }}
           className={`relative ${!previewImage ? 'shadow-xl' : ''} w-[280px] h-[450px] sm:w-[320px] sm:h-[520px] md:w-[360px] md:h-[580px]`}
           style={{
@@ -247,6 +356,7 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
         >
           {previewImage && (
             <img
+              ref={previewImageRef}
               src={previewImage}
               alt="Template background"
               className="absolute inset-0 w-full h-full object-contain pointer-events-none"
@@ -517,6 +627,8 @@ const Canvas = forwardRef<HTMLDivElement, CanvasProps>(
                     src={sticker.src}
                     draggable={false}
                     className="w-full h-full object-contain pointer-events-none"
+                    crossOrigin="anonymous"
+                    loading="eager"
                   />
                   {isSelected && (
                     <>
