@@ -83,12 +83,15 @@ const Editor = () => {
       }
 
       // Small delay to ensure DOM is fully rendered after images load
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await canvasRef.current.waitForImages();
+
+      // ensure layout & paint
+      await new Promise(r => requestAnimationFrame(() => r(null)));
+
 
       // Convert canvas to PNG image
       const dataUrl = await toPng(canvasRef.current, {
-        quality: 1.0,
-        pixelRatio: 2, // Higher quality for better image resolution
+        pixelRatio: window.devicePixelRatio || 2,
         cacheBust: true,
       });
 
