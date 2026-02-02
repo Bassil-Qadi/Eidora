@@ -81,37 +81,93 @@ const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
 
     // Helper function to wait for all images to load
     const waitForImages = useCallback(async () => {
-      const sources = new Set<string>();
-    
-      if (previewImage) sources.add(previewImage);
-    
-      elements.forEach(el => {
-        if (el.type === "sticker" || el.type === "image") {
-          sources.add((el as ImageElement).src ?? "");
+      const promises: Promise<void>[] = [];
+
+      // Wait for preview image
+      if (previewImage && previewImageRef.current) {
+        const img = previewImageRef.current;
+        if (!img.complete || img.naturalWidth === 0) {
+          promises.push(
+            new Promise<void>((resolve) => {
+              const onLoad = () => {
+                img.removeEventListener('load', onLoad);
+                img.removeEventListener('error', onError);
+                resolve();
+              };
+              const onError = () => {
+                img.removeEventListener('load', onLoad);
+                img.removeEventListener('error', onError);
+                resolve(); // Resolve even on error to not block download
+              };
+              img.addEventListener('load', onLoad);
+              img.addEventListener('error', onError);
+            })
+          );
+        }
+      }
+
+      // Wait for all sticker/image elements in the DOM
+      if (canvasRef.current) {
+        const imageElements = canvasRef.current.querySelectorAll('img');
+        imageElements.forEach((img) => {
+          if (!img.complete || img.naturalWidth === 0) {
+            promises.push(
+              new Promise<void>((resolve) => {
+                const onLoad = () => {
+                  img.removeEventListener('load', onLoad);
+                  img.removeEventListener('error', onError);
+                  resolve();
+                };
+                const onError = () => {
+                  img.removeEventListener('load', onLoad);
+                  img.removeEventListener('error', onError);
+                  resolve(); // Resolve even on error to not block download
+                };
+                img.addEventListener('load', onLoad);
+                img.addEventListener('error', onError);
+              })
+            );
+          }
+        });
+      }
+
+      // Also preload images that might not be in DOM yet (fallback)
+      const imageElements = elements.filter(
+        (el) => el.type === 'sticker' || el.type === 'image'
+      ) as ImageElement[];
+
+      imageElements.forEach((el) => {
+        // Check if this image is already in the DOM
+        const existingImg = canvasRef.current?.querySelector(`img[src="${el.src}"]`);
+        if (!existingImg) {
+          // Preload if not in DOM
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          promises.push(
+            new Promise<void>((resolve) => {
+              const onLoad = () => {
+                img.removeEventListener('load', onLoad);
+                img.removeEventListener('error', onError);
+                resolve();
+              };
+              const onError = () => {
+                img.removeEventListener('load', onLoad);
+                img.removeEventListener('error', onError);
+                resolve(); // Resolve even on error to not block download
+              };
+              img.addEventListener('load', onLoad);
+              img.addEventListener('error', onError);
+              img.src = el.src;
+            })
+          );
         }
       });
-    
-      await Promise.all(
-        [...sources].map(src => {
-          return new Promise<void>(async (resolve) => {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.src = src;
-    
-            try {
-              if ("decode" in img) {
-                await img.decode(); // 🔥 important on mobile
-              }
-            } catch {}
-    
-            resolve();
-          });
-        })
-      );
-    
-      // 🔥 ensure paint frame
-      await new Promise(r => requestAnimationFrame(() => r(null)));
-      await new Promise(r => requestAnimationFrame(() => r(null)));
+
+      // Wait for all images to load, with a timeout
+      await Promise.race([
+        Promise.all(promises),
+        new Promise<void>((resolve) => setTimeout(resolve, 5000)) // 5 second timeout
+      ]);
     }, [previewImage, elements]);
 
     // Expose method to wait for all images to load
@@ -282,24 +338,40 @@ const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
     
 
     return (
-      <div className="flex items-center justify-center w-full"
-      style={{
-        WebkitTransform: "translateZ(0)",
-        backfaceVisibility: "hidden",
-      }}
-      >
+      <div className="flex items-center justify-center w-full">
         <div
-          ref={canvasRef}
-          className="relative w-[280px] h-[450px] sm:w-[320px] sm:h-[520px] md:w-[360px] md:h-[580px]"
+          ref={(node) => {
+            canvasRef.current = node;
+            if (typeof ref === "function") {
+              ref(node as HTMLDivElement & CanvasHandle);
+            } else if (ref) {
+              (ref as React.MutableRefObject<HTMLDivElement & CanvasHandle | null>).current = node as HTMLDivElement & CanvasHandle;
+            }
+          }}
+          className={`relative ${!previewImage ? 'shadow-xl' : ''} w-[280px] h-[450px] sm:w-[320px] sm:h-[520px] md:w-[360px] md:h-[580px]`}
           style={{
-            backgroundImage: previewImage ? `url(${previewImage})` : undefined,
-            backgroundSize: "contain",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: previewImage ? "transparent" : background,
+            background: previewImage ? undefined : background
           }}
           onClick={() => onClearSelection()}
         >
+          {previewImage && (
+            <img
+              ref={previewImageRef}
+              src={previewImage}
+              alt="Template background"
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+              style={{ zIndex: 0, objectPosition: 'center' }}
+              crossOrigin="anonymous"
+              loading="eager"
+              onLoad={(e) => {
+                // Ensure image is fully loaded and rendered
+                const img = e.target as HTMLImageElement;
+                if (img.complete && img.naturalWidth > 0) {
+                  // Image is loaded
+                }
+              }}
+            />
+          )}
           <div className="relative w-full h-full" style={{ zIndex: 1 }}>
           {elements.map((el) => {
             // ---------- TEXT ----------

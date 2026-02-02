@@ -67,46 +67,55 @@ const Editor = () => {
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
       }, []);
+
+      const forceIOSRepaint = async (element: HTMLElement) => {
+        element.style.transform = "translateZ(0)";
+        await new Promise((r) => requestAnimationFrame(r));
+        element.style.transform = "";
+      };
       
-
-  const handleDownload = async () => {
-    if (!canvasRef.current) {
-      console.error('Canvas ref is not available');
-      return;
-    }
-
-    try {
-      // Wait for all images to be fully loaded before downloading
-      // This is especially important on mobile devices where images may not be cached
-      if (canvasRef.current.waitForImages) {
-        await canvasRef.current.waitForImages();
-      }
-
-      // Small delay to ensure DOM is fully rendered after images load
-      await canvasRef.current.waitForImages();
-
-      // ensure layout & paint
-      await new Promise(r => requestAnimationFrame(() => r(null)));
-
-
-      // Convert canvas to PNG image
-      const dataUrl = await toPng(canvasRef.current, {
-        pixelRatio: window.devicePixelRatio || 2,
-        cacheBust: true,
-      });
-
-      // Create a temporary link element and trigger download
-      const link = document.createElement('a');
-      link.download = `ramadan-card-${Date.now()}.png`;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Error downloading image:', error);
-      alert('Failed to download image. Please try again.');
-    }
-  };
+      const waitForImage = (src: string) =>
+        new Promise<void>((resolve) => {
+          const img = new Image();
+          img.src = src;
+          img.onload = () => resolve();
+          if (img.complete) resolve();
+        });
+      
+      const handleDownload = async () => {
+        if (!canvasRef.current) return;
+      
+        const element = canvasRef.current;
+      
+        try {
+          // ✅ wait for background image
+          if (state.previewImage) {
+            await waitForImage(state.previewImage);
+          }
+      
+          // ✅ wait for fonts (CRITICAL for iOS)
+          if (document.fonts?.ready) {
+            await document.fonts.ready;
+          }
+      
+          // ✅ force iOS repaint
+          await forceIOSRepaint(element);
+      
+          const dataUrl = await toPng(element, {
+            cacheBust: true,
+            pixelRatio: window.devicePixelRatio || 2,
+          });
+      
+          const link = document.createElement("a");
+          link.download = "card.png";
+          link.href = dataUrl;
+          link.click();
+        } catch (e) {
+          console.error("iOS export failed", e);
+        }
+      };
+      
+ 
 
   return (
     <div className="h-screen flex flex-col bg-gray-100">
