@@ -292,14 +292,25 @@ const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
           ref={canvasRef}
           className="relative w-[280px] h-[450px] sm:w-[320px] sm:h-[520px] md:w-[360px] md:h-[580px]"
           style={{
-            backgroundImage: previewImage ? `url(${previewImage})` : undefined,
-            backgroundSize: "contain",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: previewImage ? "transparent" : background,
+            // Use CSS background for solid/gradient colors when no template image is set
+            background: previewImage ? "transparent" : background,
           }}
           onClick={() => onClearSelection()}
         >
+          {/* When a template is active, render the preview image as a real <img>
+              so html-to-image (especially on iOS Safari) reliably captures it. */}
+          {previewImage && (
+            <img
+              ref={previewImageRef}
+              src={previewImage}
+              alt="Card background"
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+              crossOrigin="anonymous"
+              loading="eager"
+              style={{ zIndex: 0 }}
+            />
+          )}
+
           <div className="relative w-full h-full" style={{ zIndex: 1 }}>
           {elements.map((el) => {
             // ---------- TEXT ----------
