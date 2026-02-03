@@ -4,6 +4,8 @@ interface SidebarButtonProps {
     onClick?: () => void;
     active?: boolean;
     color?: "blue" | "yellow" | "green" | "purple";
+    disabled?: boolean;
+    className?: string;
   }
   
   const colorMap = {
@@ -35,6 +37,8 @@ interface SidebarButtonProps {
     onClick,
     active,
     color = "blue",
+    disabled = false,
+    className = "",
   }: SidebarButtonProps) {
     const c = colorMap[color];
   
@@ -51,10 +55,12 @@ interface SidebarButtonProps {
           ${active ? c.active : c.bg}
           hover:shadow
           active:scale-95
+          ${className}
+          ${disabled ? "cursor-not-allowed hover:bg-gray-50 hover:shadow-none !bg-gray-50" : ""}
         `}
       >
-        <div className={`text-lg sm:text-xl ${c.icon}`}>{icon}</div>
-        <span className="text-[10px] sm:text-[11px] font-medium text-gray-700">
+        <div className={`text-lg sm:text-xl ${c.icon} ${disabled ? "text-slate-300" : ""}`}>{icon}</div>
+        <span className={`text-[10px] sm:text-[11px] font-medium text-gray-700 ${disabled ? "text-slate-300" : ""}`}>
           {label}
         </span>
       </button>

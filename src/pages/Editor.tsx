@@ -517,6 +517,8 @@ const Editor = () => {
                 color="green"
                 icon={<MdImage />}
                 onClick={() => setShowLeftSidebar(false)}
+                disabled={true}
+                className="cursor-not-allowed hover:bg-green-50 hover:shadow-none"
               />
 
               <SidebarButton
@@ -524,6 +526,8 @@ const Editor = () => {
                 color="purple"
                 icon={<MdPalette />}
                 onClick={() => setShowLeftSidebar(false)}
+                disabled={true}
+                className="cursor-not-allowed hover:bg-purple-50 hover:shadow-none"
               />
             </aside>
           </>
@@ -549,12 +553,16 @@ const Editor = () => {
             label={t('editor.optionsSidebar.AddImageBtn')}
             color="green"
             icon={<MdImage />}
+            disabled={true}
+            className="cursor-not-allowed hover:bg-green-50 hover:shadow-none"
           />
 
           <SidebarButton
             label={t('editor.optionsSidebar.AddBackgroundBtn')}
+            className="cursor-not-allowed hover:bg-purple-50 hover:shadow-none"
             color="purple"
             icon={<MdPalette />}
+            disabled={true}
           />
         </aside>
 
