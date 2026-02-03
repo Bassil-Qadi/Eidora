@@ -11,13 +11,16 @@ import Button from '../components/UI/Button';
 import { LanguageSwitcher } from '../components/UI/LanguageSwitcher';
 import { useEditor } from "../hooks/useEditor";
 import { useLanguage } from "../hooks/useLanguage";
-import { TextElement } from "../types/editor";
+import { TextElement, ImageElement } from "../types/editor";
 import { templates } from '../data/templates';
 import { DUAS } from '../data/duas';
 import { STICKERS } from '../data/stickers';
 import { MdTextFields, MdEmojiEmotions, MdImage, MdPalette, MdContentCopy, MdMenu, MdClose } from "react-icons/md";
 import { FiTrash } from "react-icons/fi";
 import UndoRedoContainer from '../components/UI/UndoRedoContainer';
+
+const CARD_BASE_WIDTH = 360;
+const CARD_BASE_HEIGHT = 580;
 
 const Editor = () => {
 
@@ -184,12 +187,156 @@ const Editor = () => {
         });
       };
       
+      const loadImage = (src: string): Promise<HTMLImageElement> => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+          img.src = src;
+        });
+      };
+
+      const exportWithCanvasForIOS = async () => {
+        // High-resolution offscreen canvas based on design size
+        const scale = Math.max(2, Math.floor((window.devicePixelRatio || 2)));
+        const canvas = document.createElement("canvas");
+        canvas.width = CARD_BASE_WIDTH * scale;
+        canvas.height = CARD_BASE_HEIGHT * scale;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        // Draw background (template image if present)
+        const bgSrc = resolvedPreviewImage ?? state.previewImage;
+        if (bgSrc) {
+          try {
+            const bgImg = await loadImage(bgSrc);
+            ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+          } catch {
+            // Fallback: solid fill if background is a simple color
+            ctx.fillStyle = state.background || "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
+        } else {
+          ctx.fillStyle = state.background || "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Cache for sticker/image assets
+        const imageCache = new Map<string, HTMLImageElement>();
+        const getCachedImage = async (src: string) => {
+          if (imageCache.has(src)) return imageCache.get(src)!;
+          const img = await loadImage(src);
+          imageCache.set(src, img);
+          return img;
+        };
+
+        const toRadians = (deg?: number) => ((deg ?? 0) * Math.PI) / 180;
+
+        // Draw elements
+        for (const el of state.elements) {
+          if (el.type === "sticker" || el.type === "image") {
+            const sticker = el as ImageElement;
+            try {
+              const img = await getCachedImage(sticker.src);
+              const centerX = (sticker.x / 100) * CARD_BASE_WIDTH * scale;
+              const centerY = (sticker.y / 100) * CARD_BASE_HEIGHT * scale;
+              const drawWidth = sticker.width * scale;
+              const drawHeight = sticker.height * scale;
+
+              ctx.save();
+              ctx.translate(centerX, centerY);
+              ctx.rotate(toRadians(sticker.rotation));
+              ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+              ctx.restore();
+            } catch {
+              // Skip images that fail to load
+              continue;
+            }
+          } else if (el.type === "text") {
+            const text = el as TextElement;
+            const centerX = (text.x / 100) * CARD_BASE_WIDTH * scale;
+            const centerY = (text.y / 100) * CARD_BASE_HEIGHT * scale;
+            const maxWidth = (text.width ?? 200) * scale;
+
+            const fontSize = text.fontSize * scale;
+            const fontFamily = text.fontFamily || "Cairo";
+            const fontWeight = text.bold ? "700" : "400";
+            const fontStyle = text.italic ? "italic" : "normal";
+
+            ctx.save();
+            ctx.fillStyle = text.color;
+            ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+            ctx.textAlign = text.align ?? "center";
+            ctx.textBaseline = "middle";
+
+            const lineHeight = fontSize * 1.3;
+            const lines = (text.text || "").split("\n");
+            const totalHeight = lines.length * lineHeight;
+            let currentY = centerY - totalHeight / 2 + lineHeight / 2;
+
+            for (const line of lines) {
+              ctx.fillText(line, centerX, currentY, maxWidth);
+              currentY += lineHeight;
+            }
+
+            // Simple underline approximation (under the first line width)
+            if (text.underline && lines.length > 0) {
+              const metrics = ctx.measureText(lines[0]);
+              const underlineWidth = Math.min(maxWidth, metrics.width);
+              let startX = centerX;
+              if ((ctx.textAlign as CanvasTextAlign) === "center") {
+                startX -= underlineWidth / 2;
+              } else if ((ctx.textAlign as CanvasTextAlign) === "right") {
+                startX -= underlineWidth;
+              }
+              const underlineY = centerY + totalHeight / 2;
+
+              ctx.beginPath();
+              ctx.moveTo(startX, underlineY);
+              ctx.lineTo(startX + underlineWidth, underlineY);
+              ctx.lineWidth = Math.max(1, fontSize / 15);
+              ctx.strokeStyle = text.color;
+              ctx.stroke();
+            }
+
+            ctx.restore();
+          }
+        }
+
+        // Ensure fonts are ready before extracting the image (especially for custom fonts)
+        if (document.fonts?.ready) {
+          try {
+            await document.fonts.ready;
+          } catch {
+            // ignore font readiness errors
+          }
+        }
+
+        const dataUrl = canvas.toDataURL("image/png");
+
+        // iOS supports download attribute in modern versions, but as a fallback this still works
+        const link = document.createElement("a");
+        link.download = "card.png";
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
+
       const handleDownload = async () => {
         if (!canvasRef.current) return;
       
         const element = canvasRef.current;
       
         try {
+          // On iOS, when a template image is active, use a dedicated canvas-based export
+          // to avoid html-to-image bugs with first-load images.
+          if (isIOSSafari && (resolvedPreviewImage || state.previewImage)) {
+            await exportWithCanvasForIOS();
+            return;
+          }
+
           // Ensure the template background is a resolved data URL before capture.
           // This prevents html-to-image from racing a first-time network fetch on iOS.
           if (state.previewImage && !resolvedPreviewImage) {
