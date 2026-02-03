@@ -80,138 +80,6 @@ const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
     const [rotatingId, setRotatingId] = useState<string | null>(null);
     const [resizingTextId, setResizingTextId] = useState<string | null>(null);
 
-    // Helper function to wait for all images to load
-    const waitForImages = useCallback(async () => {
-      const sources = new Set<string>();
-    
-      if (previewImage) sources.add(previewImage);
-    
-      elements.forEach(el => {
-        if (el.type === "sticker" || el.type === "image") {
-          sources.add((el as ImageElement).src ?? "");
-        }
-      });
-    
-      // Wait for all images to decode
-      await Promise.all(
-        [...sources].map(src => {
-          return new Promise<void>((resolve) => {
-            let resolved = false;
-            const doResolve = () => {
-              if (!resolved) {
-                resolved = true;
-                resolve();
-              }
-            };
-            
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.src = src;
-    
-            // Check if already loaded
-            if (img.complete && img.naturalWidth > 0) {
-              doResolve();
-              return;
-            }
-    
-            try {
-              if ("decode" in img) {
-                img.decode()
-                  .then(() => {
-                    // Verify it's actually loaded
-                    if (img.complete && img.naturalWidth > 0) {
-                      doResolve();
-                    } else {
-                      // Fallback to onload if decode doesn't guarantee load
-                      img.onload = () => doResolve();
-                      img.onerror = () => doResolve();
-                    }
-                  })
-                  .catch(() => {
-                    // If decode fails, use onload/onerror
-                    img.onload = () => doResolve();
-                    img.onerror = () => doResolve();
-                  });
-              } else {
-                // Fallback for browsers without decode()
-                img.onload = () => doResolve();
-                img.onerror = () => doResolve();
-              }
-            } catch {
-              // If anything fails, use onload/onerror
-              img.onload = () => doResolve();
-              img.onerror = () => doResolve();
-            }
-          });
-        })
-      );
-    
-      // 🔥 CRITICAL: Wait for the actual DOM image element to be loaded and painted
-      // This is especially important for iOS Safari where images may decode but not paint immediately
-      if (previewImage && previewImageRef.current) {
-        const domImg = previewImageRef.current;
-        await new Promise<void>((resolve) => {
-          let resolved = false;
-          const doResolve = () => {
-            if (!resolved) {
-              resolved = true;
-              resolve();
-            }
-          };
-          
-          // Check if already loaded
-          if (domImg.complete && domImg.naturalWidth > 0 && domImg.naturalHeight > 0) {
-            // Image is loaded, but ensure it's painted
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                doResolve();
-              });
-            });
-          } else {
-            // Wait for load event
-            const onLoad = () => {
-              domImg.removeEventListener('load', onLoad);
-              domImg.removeEventListener('error', onError);
-              // Give iOS Safari extra time to paint
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  doResolve();
-                });
-              });
-            };
-            const onError = () => {
-              domImg.removeEventListener('load', onLoad);
-              domImg.removeEventListener('error', onError);
-              doResolve(); // Resolve even on error
-            };
-            domImg.addEventListener('load', onLoad);
-            domImg.addEventListener('error', onError);
-          }
-        });
-      }
-    
-      // 🔥 ensure paint frame - multiple frames for iOS Safari
-      await new Promise(r => requestAnimationFrame(() => r(null)));
-      await new Promise(r => requestAnimationFrame(() => r(null)));
-      await new Promise(r => requestAnimationFrame(() => r(null)));
-    }, [previewImage, elements]);
-
-    // Helper to get preview image element
-    const getPreviewImageElement = useCallback(() => {
-      return previewImageRef.current;
-    }, []);
-
-    // Expose method to wait for all images to load
-    useImperativeHandle(ref, () => {
-      if (!canvasRef.current) {
-        return null as any;
-      }
-      return Object.assign(canvasRef.current, {
-        waitForImages,
-        getPreviewImageElement,
-      }) as HTMLDivElement & CanvasHandle;
-    }, [waitForImages, getPreviewImageElement]);
-
     // Dragging - unified handler for mouse and touch
     useEffect(() => {
       const getClientCoords = (e: MouseEvent | TouchEvent) => {
@@ -368,6 +236,77 @@ const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
       return () => window.removeEventListener("keydown", handleKeyDown);
     }, [selectedElementIds, editingId]);
     
+    // Expose methods for download functionality
+    useImperativeHandle(ref, () => {
+      const waitForImages = async () => {
+        if (!canvasRef.current) return;
+        
+        // Wait for all image elements in the canvas
+        const images = canvasRef.current.querySelectorAll('img');
+        const imagePromises = Array.from(images).map((img) => {
+          if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+            return Promise.resolve();
+          }
+          
+          return new Promise<void>((resolve) => {
+            const timeout = setTimeout(() => {
+              img.removeEventListener('load', onLoad);
+              img.removeEventListener('error', onError);
+              resolve(); // Resolve even on timeout to not block
+            }, 5000);
+            
+            const onLoad = () => {
+              clearTimeout(timeout);
+              img.removeEventListener('load', onLoad);
+              img.removeEventListener('error', onError);
+              resolve();
+            };
+            
+            const onError = () => {
+              clearTimeout(timeout);
+              img.removeEventListener('load', onLoad);
+              img.removeEventListener('error', onError);
+              resolve(); // Resolve even on error to not block
+            };
+            
+            img.addEventListener('load', onLoad);
+            img.addEventListener('error', onError);
+          });
+        });
+        
+        await Promise.all(imagePromises);
+        
+        // Additional wait for fonts to be ready
+        if (document.fonts?.ready) {
+          try {
+            await document.fonts.ready;
+          } catch {
+            // Ignore font readiness errors
+          }
+        }
+      };
+
+      const getPreviewImageElement = () => {
+        return previewImageRef.current;
+      };
+
+      // Return an object that has the div element and the methods
+      // We use Object.assign to merge the div element with the methods
+      const divElement = canvasRef.current;
+      if (divElement) {
+        // Create a proxy-like object that has the methods and delegates to the div
+        return Object.assign(divElement, {
+          waitForImages,
+          getPreviewImageElement,
+        }) as HTMLDivElement & CanvasHandle;
+      }
+      
+      // Fallback (shouldn't happen in practice)
+      return {
+        waitForImages,
+        getPreviewImageElement,
+      } as unknown as HTMLDivElement & CanvasHandle;
+    }, []);
 
     return (
       <div className="flex items-center justify-center w-full"

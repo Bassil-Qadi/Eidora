@@ -72,6 +72,9 @@ const Editor = () => {
         return () => window.removeEventListener("keydown", handler);
       }, []);
 
+      // Detect iOS Safari
+      const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+
       const fetchImageAsDataUrl = async (url: string, signal?: AbortSignal): Promise<string> => {
         const res = await fetch(url, { cache: "force-cache", signal });
         if (!res.ok) {
@@ -87,36 +90,6 @@ const Editor = () => {
         });
       };
 
-      // Preload template preview into a resolved data URL to avoid iOS Safari / html-to-image races
-      useEffect(() => {
-        const url = state.previewImage;
-        if (!url) {
-          setResolvedPreviewImage(undefined);
-          return;
-        }
-
-        const ac = new AbortController();
-        let cancelled = false;
-
-        (async () => {
-          try {
-            const dataUrl = await fetchImageAsDataUrl(url, ac.signal);
-            if (!cancelled) setResolvedPreviewImage(dataUrl);
-          } catch (e) {
-            // Fallback to original URL if fetch/convert fails
-            if (!cancelled) setResolvedPreviewImage(url);
-          }
-        })();
-
-        return () => {
-          cancelled = true;
-          ac.abort();
-        };
-      }, [state.previewImage]);
-
-      // Detect iOS Safari
-      const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-      
       const forceIOSRepaint = async (element: HTMLElement) => {
         element.style.transform = "translateZ(0)";
         await new Promise((r) => requestAnimationFrame(r));
@@ -315,13 +288,30 @@ const Editor = () => {
 
         const dataUrl = canvas.toDataURL("image/png");
 
-        // iOS supports download attribute in modern versions, but as a fallback this still works
-        const link = document.createElement("a");
-        link.download = "card.png";
-        link.href = dataUrl;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // iOS-specific download handling
+        // For iOS Safari, we need to handle downloads differently
+        if (isIOSSafari) {
+          // Try using the download attribute first (works on iOS 13+)
+          const link = document.createElement("a");
+          link.download = "ramadan-card.png";
+          link.href = dataUrl;
+          link.style.display = "none";
+          document.body.appendChild(link);
+          link.click();
+          
+          // Clean up after a delay
+          setTimeout(() => {
+            document.body.removeChild(link);
+          }, 100);
+        } else {
+          // Standard download for other browsers
+          const link = document.createElement("a");
+          link.download = "ramadan-card.png";
+          link.href = dataUrl;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
       };
 
       const handleDownload = async () => {
@@ -395,19 +385,53 @@ const Editor = () => {
             // cacheBust can force a refetch inside html-to-image; avoid it since we pre-resolve the src
             cacheBust: false,
             pixelRatio: window.devicePixelRatio || 2,
+            backgroundColor: state.background || "#ffffff",
           });
       
-          const link = document.createElement("a");
-          link.download = "card.png";
-          link.href = dataUrl;
-          link.click();
+          // iOS-specific download handling
+          if (isIOSSafari) {
+            // For iOS Safari, create a link and trigger download
+            const link = document.createElement("a");
+            link.download = "ramadan-card.png";
+            link.href = dataUrl;
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up after a delay
+            setTimeout(() => {
+              if (link.parentNode) {
+                document.body.removeChild(link);
+              }
+            }, 100);
+          } else {
+            // Standard download for other browsers
+            const link = document.createElement("a");
+            link.download = "ramadan-card.png";
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
         } catch (e) {
           console.error("Download failed", e);
+          // Fallback: try to open image in new tab if download fails
+          try {
+            const dataUrl = await toPng(element, {
+              cacheBust: false,
+              pixelRatio: 1,
+              backgroundColor: state.background || "#ffffff",
+            });
+            const newWindow = window.open();
+            if (newWindow) {
+              newWindow.document.write(`<img src="${dataUrl}" alt="Ramadan Card" />`);
+            }
+          } catch (fallbackError) {
+            console.error("Fallback download also failed", fallbackError);
+          }
         }
       };
       
- 
-
   return (
     <div className="h-screen flex flex-col bg-gray-100">
       {/* Header */}
