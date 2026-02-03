@@ -3,41 +3,19 @@
 @tailwind utilities;
 
 
-@font-face {
-    font-family: 'Cairo';
-    src: url('/assets/fonts/Cairo-font.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Tajawal';
-    src: url('/assets/fonts/Tajawal-Regular.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Amiri';
-    src: url('/assets/fonts/Amiri-Regular.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
+/* English Fonts */
 
 @font-face {
     font-family: 'Inter';
-    src: url('/assets/fonts/Inter.ttf') format('truetype');
-    font-weight: 400;
+    src: url('/assets/new-fonts/Inter.woff2') format('woff2');
+    font-weight: 100 900;
     font-style: normal;
     font-display: swap;
-}
+  }
 
 @font-face {
     font-family: 'Poppins';
-    src: url('/assets/fonts/Poppins-Regular.ttf') format('truetype');
+    src: url('/assets/new-fonts/Poppins-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -45,16 +23,32 @@
 
 @font-face {
     font-family: 'Montserrat';
-    src: url('/assets/fonts/Montserrat.ttf') format('truetype');
+    src: url('/assets/new-fonts/Montserrat.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'Roboto';
-    src: url('/assets/fonts/Roboto.ttf') format('truetype');
+    font-family: 'Cairo';
+    src: url('/assets/new-fonts/Cairo-font.woff2') format('woff2');
+    font-weight: 300 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Tajawal';
+    src: url('/assets/new-fonts/Tajawal-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
-}
+  }
+
+  @font-face {
+    font-family: 'Amiri';
+    src: url('/assets/new-fonts/Amiri-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
