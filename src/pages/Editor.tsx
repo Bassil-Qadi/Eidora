@@ -27,6 +27,7 @@ const Editor = () => {
   const [showStickers, setShowStickers] = useState(false);
   const [showLeftSidebar, setShowLeftSidebar] = useState(false);
   const [showRightSidebar, setShowRightSidebar] = useState(false);  
+  const [resolvedPreviewImage, setResolvedPreviewImage] = useState<string | undefined>(undefined);
 
   const selectedElement =
     state?.selectedElementIds?.length === 1
@@ -67,6 +68,48 @@ const Editor = () => {
         window.addEventListener("keydown", handler);
         return () => window.removeEventListener("keydown", handler);
       }, []);
+
+      const fetchImageAsDataUrl = async (url: string, signal?: AbortSignal): Promise<string> => {
+        const res = await fetch(url, { cache: "force-cache", signal });
+        if (!res.ok) {
+          throw new Error(`Failed to fetch image: ${res.status} ${res.statusText}`);
+        }
+        const blob = await res.blob();
+
+        return await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(reader.error ?? new Error("Failed to read image blob"));
+          reader.readAsDataURL(blob);
+        });
+      };
+
+      // Preload template preview into a resolved data URL to avoid iOS Safari / html-to-image races
+      useEffect(() => {
+        const url = state.previewImage;
+        if (!url) {
+          setResolvedPreviewImage(undefined);
+          return;
+        }
+
+        const ac = new AbortController();
+        let cancelled = false;
+
+        (async () => {
+          try {
+            const dataUrl = await fetchImageAsDataUrl(url, ac.signal);
+            if (!cancelled) setResolvedPreviewImage(dataUrl);
+          } catch (e) {
+            // Fallback to original URL if fetch/convert fails
+            if (!cancelled) setResolvedPreviewImage(url);
+          }
+        })();
+
+        return () => {
+          cancelled = true;
+          ac.abort();
+        };
+      }, [state.previewImage]);
 
       // Detect iOS Safari
       const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
@@ -147,6 +190,20 @@ const Editor = () => {
         const element = canvasRef.current;
       
         try {
+          // Ensure the template background is a resolved data URL before capture.
+          // This prevents html-to-image from racing a first-time network fetch on iOS.
+          if (state.previewImage && !resolvedPreviewImage) {
+            try {
+              const dataUrl = await fetchImageAsDataUrl(state.previewImage);
+              setResolvedPreviewImage(dataUrl);
+              // Wait for React to paint the new src into the DOM
+              await new Promise((r) => requestAnimationFrame(r));
+              await new Promise((r) => requestAnimationFrame(r));
+            } catch {
+              // ignore and let it proceed with original url
+            }
+          }
+
           // ✅ Step 1: Wait for all images to decode and load
           if (typeof element.waitForImages === "function") {
             await element.waitForImages();
@@ -154,7 +211,7 @@ const Editor = () => {
       
           // ✅ Step 2: Explicitly wait for the DOM image element (CRITICAL for iOS)
           // This ensures the actual rendered image in the DOM is loaded and painted
-          if (state.previewImage && typeof element.getPreviewImageElement === "function") {
+          if ((resolvedPreviewImage || state.previewImage) && typeof element.getPreviewImageElement === "function") {
             const previewImgElement = element.getPreviewImageElement();
             if (previewImgElement) {
               await waitForDOMImage(previewImgElement);
@@ -188,7 +245,8 @@ const Editor = () => {
           }
       
           const dataUrl = await toPng(element, {
-            cacheBust: true,
+            // cacheBust can force a refetch inside html-to-image; avoid it since we pre-resolve the src
+            cacheBust: false,
             pixelRatio: window.devicePixelRatio || 2,
           });
       
@@ -352,8 +410,8 @@ const Editor = () => {
                 onResize={resizeElement}
                 onRotate={rotateElement}
                 onDelete={(id) => deleteSelected()}
-                background={state.previewImage ? `url(${state.previewImage}) center/cover` : state.background}
-                previewImage={state.previewImage}
+                background={(resolvedPreviewImage ?? state.previewImage) ? `url(${resolvedPreviewImage ?? state.previewImage}) center/cover` : state.background}
+                previewImage={resolvedPreviewImage ?? state.previewImage}
                 onClearSelection={clearSelection}
                 duplicateSelected={duplicateSelected}
               />
