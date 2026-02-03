@@ -2,65 +2,171 @@
 @tailwind components;
 @tailwind utilities;
 
-html[lang="ar"],
-html[lang="ar"] body,
-html[lang="ar"] #root {
-  font-style: normal !important;
-}
+/* Fonts
+   - Use WOFF2 first (best for iOS Safari), fall back to TTF.
+   - Declare correct weights/styles so Safari doesn't fall back to system fonts.
+*/
 
-html[lang="ar"] * {
-  font-style: normal !important;
-  font-synthesis: none !important;
-  -webkit-text-size-adjust: 100%;
-}
-
-
-/* English Fonts */
-
+/* ---------- Latin ---------- */
 @font-face {
-    font-family: 'Inter';
-    src: url('/assets/new-fonts/Inter.woff2') format('woff2');
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
-  }
-
-@font-face {
-    font-family: 'Poppins';
-    src: url('/assets/new-fonts/Poppins-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'Inter';
+  src:
+    url('/assets/new-fonts/Inter.woff2') format('woff2'),
+    url('/assets/fonts/Inter.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: 'Montserrat';
-    src: url('/assets/new-fonts/Montserrat.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'Poppins';
+  src:
+    url('/assets/new-fonts/Poppins-Regular.woff2') format('woff2'),
+    url('/assets/fonts/Poppins-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: 'Cairo';
-    src: url('/assets/new-fonts/Cairo-font.woff2') format('woff2');
-    font-weight: 300 700;
-    font-style: normal;
-    font-display: swap;
-  }
+  font-family: 'Montserrat';
+  src:
+    url('/assets/new-fonts/Montserrat.woff2') format('woff2'),
+    url('/assets/fonts/Montserrat.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
-  @font-face {
-    font-family: 'Tajawal';
-    src: url('/assets/new-fonts/Tajawal-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
+@font-face {
+  font-family: 'Roboto';
+  src:
+    url('/assets/new-fonts/Roboto.woff2') format('woff2'),
+    url('/assets/fonts/Roboto.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
-  @font-face {
-    font-family: 'Amiri';
-    src: url('/assets/new-fonts/Amiri-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
+/* ---------- Arabic ---------- */
+@font-face {
+  font-family: 'Cairo';
+  src:
+    url('/assets/new-fonts/Cairo-font.woff2') format('woff2'),
+    url('/assets/fonts/Cairo-font.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Tajawal (weights used by Tailwind: 200/300/400/500/700/800/900) */
+@font-face {
+  font-family: 'Tajawal';
+  src:
+    url('/assets/new-fonts/Tajawal-ExtraLight.woff2') format('woff2'),
+    url('/assets/fonts/Tajawal-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  src:
+    url('/assets/new-fonts/Tajawal-Light.woff2') format('woff2'),
+    url('/assets/fonts/Tajawal-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  src:
+    url('/assets/new-fonts/Tajawal-Regular.woff2') format('woff2'),
+    url('/assets/fonts/Tajawal-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  src:
+    url('/assets/new-fonts/Tajawal-Medium.woff2') format('woff2'),
+    url('/assets/fonts/Tajawal-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  src:
+    url('/assets/new-fonts/Tajawal-Bold.woff2') format('woff2'),
+    url('/assets/fonts/Tajawal-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  src:
+    url('/assets/new-fonts/Tajawal-ExtraBold.woff2') format('woff2'),
+    url('/assets/fonts/Tajawal-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  src:
+    url('/assets/new-fonts/Tajawal-Black.woff2') format('woff2'),
+    url('/assets/fonts/Tajawal-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Amiri (include real italic faces so Safari won't synthesize) */
+@font-face {
+  font-family: 'Amiri';
+  src:
+    url('/assets/new-fonts/Amiri-Regular.woff2') format('woff2'),
+    url('/assets/fonts/Amiri-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amiri';
+  src:
+    url('/assets/new-fonts/Amiri-Italic.woff2') format('woff2'),
+    url('/assets/fonts/Amiri-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amiri';
+  src:
+    url('/assets/new-fonts/Amiri-Bold.woff2') format('woff2'),
+    url('/assets/fonts/Amiri-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amiri';
+  src:
+    url('/assets/new-fonts/Amiri-BoldItalic.woff2') format('woff2'),
+    url('/assets/fonts/Amiri-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}

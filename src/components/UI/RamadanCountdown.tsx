@@ -122,7 +122,7 @@ export const RamadanCountdown: React.FC = () => {
           label={t('countdown.minutes')} 
         />
       </div>
-      <p className="countdown-message">{t('countdown.message')}</p>
+      <p className={`countdown-message ${isRTL ? 'no-italic' : ''}`}>{t('countdown.message')}</p>
     </div>
   );
 };

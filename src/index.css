@@ -26,15 +26,12 @@ html[lang="en"] {
 
 /* Arabic font (iOS-safe) */
 html[lang="ar"] {
-  font-family: 'Cairo', 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
+  font-family: 'Tajawal', 'Cairo', 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
   font-style: normal;
-  font-synthesis: none; /* Prevent fake italic on iOS */
+  font-synthesis: none; /* Prevent fake italic/bold on iOS */
+  font-synthesis-style: none;
 }
 
-/* Force normal style for Arabic text */
-html[lang="ar"] * {
-  font-style: normal !important;
-}
 
 /* Base layout */
 body {
