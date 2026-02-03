@@ -460,8 +460,7 @@ const Editor = () => {
             className="px-3 sm:px-4 py-2 text-xs sm:text-sm bg-gray-200 rounded-md hover:bg-gray-300"
             onClick={handleDownload}
           >
-            <span className="hidden sm:inline">{t('editor.navbar.buttonText')}</span>
-            <span className="sm:hidden">{t('editor.navbar.buttonText')}</span>
+            {t('editor.navbar.buttonText')}
           </button>
           <div className="hidden sm:block">
             <LanguageSwitcher />
