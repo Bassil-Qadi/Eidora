@@ -68,19 +68,78 @@ const Editor = () => {
         return () => window.removeEventListener("keydown", handler);
       }, []);
 
+      // Detect iOS Safari
+      const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      
       const forceIOSRepaint = async (element: HTMLElement) => {
         element.style.transform = "translateZ(0)";
         await new Promise((r) => requestAnimationFrame(r));
         element.style.transform = "";
+        // Additional repaint frames for iOS
+        if (isIOSSafari) {
+          await new Promise((r) => requestAnimationFrame(r));
+          await new Promise((r) => requestAnimationFrame(r));
+        }
       };
       
-      const waitForImage = (src: string) =>
-        new Promise<void>((resolve) => {
-          const img = new Image();
-          img.src = src;
-          img.onload = () => resolve();
-          if (img.complete) resolve();
+      const waitForDOMImage = async (imgElement: HTMLImageElement | null): Promise<void> => {
+        if (!imgElement) return;
+        
+        return new Promise<void>((resolve) => {
+          let resolved = false;
+          const doResolve = () => {
+            if (!resolved) {
+              resolved = true;
+              resolve();
+            }
+          };
+          
+          // Check if already loaded with valid dimensions
+          if (imgElement.complete && imgElement.naturalWidth > 0 && imgElement.naturalHeight > 0) {
+            // Image is loaded, but ensure it's painted on iOS
+            if (isIOSSafari) {
+              // Multiple animation frames to ensure paint
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => {
+                    doResolve();
+                  });
+                });
+              });
+            } else {
+              requestAnimationFrame(() => doResolve());
+            }
+            return;
+          }
+          
+          // Wait for load event
+          const onLoad = () => {
+            imgElement.removeEventListener('load', onLoad);
+            imgElement.removeEventListener('error', onError);
+            // Extra frames for iOS to ensure painting
+            if (isIOSSafari) {
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => {
+                    doResolve();
+                  });
+                });
+              });
+            } else {
+              requestAnimationFrame(() => doResolve());
+            }
+          };
+          
+          const onError = () => {
+            imgElement.removeEventListener('load', onLoad);
+            imgElement.removeEventListener('error', onError);
+            doResolve(); // Resolve even on error to not block
+          };
+          
+          imgElement.addEventListener('load', onLoad);
+          imgElement.addEventListener('error', onError);
         });
+      };
       
       const handleDownload = async () => {
         if (!canvasRef.current) return;
@@ -88,23 +147,45 @@ const Editor = () => {
         const element = canvasRef.current;
       
         try {
-          // ✅ ensure all images inside the canvas (template background + stickers) are fully loaded
+          // ✅ Step 1: Wait for all images to decode and load
           if (typeof element.waitForImages === "function") {
             await element.waitForImages();
           }
       
-          // ✅ extra safety: explicitly wait for template preview image (first time on iOS)
-          if (state.previewImage) {
-            await waitForImage(state.previewImage);
+          // ✅ Step 2: Explicitly wait for the DOM image element (CRITICAL for iOS)
+          // This ensures the actual rendered image in the DOM is loaded and painted
+          if (state.previewImage && typeof element.getPreviewImageElement === "function") {
+            const previewImgElement = element.getPreviewImageElement();
+            if (previewImgElement) {
+              await waitForDOMImage(previewImgElement);
+              
+              // ✅ Step 3: Additional iOS-specific wait to ensure image is painted
+              if (isIOSSafari) {
+                // Verify the image has valid dimensions (painted)
+                let attempts = 0;
+                while (attempts < 10 && (!previewImgElement.naturalWidth || previewImgElement.naturalWidth === 0)) {
+                  await new Promise(r => setTimeout(r, 50));
+                  attempts++;
+                }
+                
+                // Extra delay for iOS Safari to ensure rendering
+                await new Promise(r => setTimeout(r, 100));
+              }
+            }
           }
       
-          // ✅ wait for fonts (CRITICAL for iOS)
+          // ✅ Step 4: Wait for fonts (CRITICAL for iOS)
           if (document.fonts?.ready) {
             await document.fonts.ready;
           }
       
-          // ✅ force iOS repaint so the loaded background is actually painted before capture
+          // ✅ Step 5: Force repaint so everything is painted before capture
           await forceIOSRepaint(element);
+          
+          // ✅ Step 6: Additional iOS-specific delay before capture
+          if (isIOSSafari) {
+            await new Promise(r => setTimeout(r, 50));
+          }
       
           const dataUrl = await toPng(element, {
             cacheBust: true,
@@ -116,7 +197,7 @@ const Editor = () => {
           link.href = dataUrl;
           link.click();
         } catch (e) {
-          console.error("iOS export failed", e);
+          console.error("Download failed", e);
         }
       };
       
@@ -151,7 +232,7 @@ const Editor = () => {
             onClick={handleDownload}
           >
             <span className="hidden sm:inline">{t('editor.navbar.buttonText')}</span>
-            <span className="sm:hidden">Download</span>
+            <span className="sm:hidden">{t('editor.navbar.buttonText')}</span>
           </button>
           <div className="hidden sm:block">
             <LanguageSwitcher />

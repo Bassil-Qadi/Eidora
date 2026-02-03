@@ -21,6 +21,7 @@ interface CanvasProps {
 
 export interface CanvasHandle {
   waitForImages: () => Promise<void>;
+  getPreviewImageElement: () => HTMLImageElement | null;
 }
 
 const SNAP_THRESHOLD = 1.5;
@@ -91,28 +92,114 @@ const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
         }
       });
     
+      // Wait for all images to decode
       await Promise.all(
         [...sources].map(src => {
-          return new Promise<void>(async (resolve) => {
+          return new Promise<void>((resolve) => {
+            let resolved = false;
+            const doResolve = () => {
+              if (!resolved) {
+                resolved = true;
+                resolve();
+              }
+            };
+            
             const img = new Image();
             img.crossOrigin = "anonymous";
             img.src = src;
     
+            // Check if already loaded
+            if (img.complete && img.naturalWidth > 0) {
+              doResolve();
+              return;
+            }
+    
             try {
               if ("decode" in img) {
-                await img.decode(); // 🔥 important on mobile
+                img.decode()
+                  .then(() => {
+                    // Verify it's actually loaded
+                    if (img.complete && img.naturalWidth > 0) {
+                      doResolve();
+                    } else {
+                      // Fallback to onload if decode doesn't guarantee load
+                      img.onload = () => doResolve();
+                      img.onerror = () => doResolve();
+                    }
+                  })
+                  .catch(() => {
+                    // If decode fails, use onload/onerror
+                    img.onload = () => doResolve();
+                    img.onerror = () => doResolve();
+                  });
+              } else {
+                // Fallback for browsers without decode()
+                img.onload = () => doResolve();
+                img.onerror = () => doResolve();
               }
-            } catch {}
-    
-            resolve();
+            } catch {
+              // If anything fails, use onload/onerror
+              img.onload = () => doResolve();
+              img.onerror = () => doResolve();
+            }
           });
         })
       );
     
-      // 🔥 ensure paint frame
+      // 🔥 CRITICAL: Wait for the actual DOM image element to be loaded and painted
+      // This is especially important for iOS Safari where images may decode but not paint immediately
+      if (previewImage && previewImageRef.current) {
+        const domImg = previewImageRef.current;
+        await new Promise<void>((resolve) => {
+          let resolved = false;
+          const doResolve = () => {
+            if (!resolved) {
+              resolved = true;
+              resolve();
+            }
+          };
+          
+          // Check if already loaded
+          if (domImg.complete && domImg.naturalWidth > 0 && domImg.naturalHeight > 0) {
+            // Image is loaded, but ensure it's painted
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                doResolve();
+              });
+            });
+          } else {
+            // Wait for load event
+            const onLoad = () => {
+              domImg.removeEventListener('load', onLoad);
+              domImg.removeEventListener('error', onError);
+              // Give iOS Safari extra time to paint
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  doResolve();
+                });
+              });
+            };
+            const onError = () => {
+              domImg.removeEventListener('load', onLoad);
+              domImg.removeEventListener('error', onError);
+              doResolve(); // Resolve even on error
+            };
+            domImg.addEventListener('load', onLoad);
+            domImg.addEventListener('error', onError);
+          }
+        });
+      }
+    
+      // 🔥 ensure paint frame - multiple frames for iOS Safari
+      await new Promise(r => requestAnimationFrame(() => r(null)));
       await new Promise(r => requestAnimationFrame(() => r(null)));
       await new Promise(r => requestAnimationFrame(() => r(null)));
     }, [previewImage, elements]);
+
+    // Helper to get preview image element
+    const getPreviewImageElement = useCallback(() => {
+      return previewImageRef.current;
+    }, []);
 
     // Expose method to wait for all images to load
     useImperativeHandle(ref, () => {
@@ -121,8 +208,9 @@ const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
       }
       return Object.assign(canvasRef.current, {
         waitForImages,
+        getPreviewImageElement,
       }) as HTMLDivElement & CanvasHandle;
-    }, [waitForImages]);
+    }, [waitForImages, getPreviewImageElement]);
 
     // Dragging - unified handler for mouse and touch
     useEffect(() => {
