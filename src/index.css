@@ -18,6 +18,11 @@
   text-align: right;
 }
 
+/* Ensure buttons maintain proper vertical alignment in RTL mode, especially on mobile */
+[dir="rtl"] button {
+  line-height: 1.5;
+}
+
 /* English font */
 html[lang="en"] {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,

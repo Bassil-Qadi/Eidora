@@ -440,7 +440,7 @@ const Editor = () => {
         <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-            className="lg:hidden p-2 rounded-md hover:bg-gray-100"
+            className="flex items-center justify-center lg:hidden p-2 rounded-md hover:bg-gray-100"
             aria-label="Toggle left sidebar"
           >
             <MdMenu className="text-xl" />
@@ -457,7 +457,7 @@ const Editor = () => {
 
         <div className='flex items-center gap-2 sm:gap-4'>
           <button
-            className="px-3 sm:px-4 py-2 text-xs sm:text-sm bg-gray-200 rounded-md hover:bg-gray-300"
+            className="flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm bg-gray-200 rounded-md hover:bg-gray-300"
             onClick={handleDownload}
           >
             {t('editor.navbar.buttonText')}
@@ -467,7 +467,7 @@ const Editor = () => {
           </div>
           <button
             onClick={() => setShowRightSidebar(!showRightSidebar)}
-            className="lg:hidden p-2 rounded-md hover:bg-gray-100"
+            className="flex items-center justify-center lg:hidden p-2 rounded-md hover:bg-gray-100"
             aria-label="Toggle right sidebar"
           >
             <MdMenu className="text-xl" />
@@ -487,7 +487,7 @@ const Editor = () => {
             <aside className="fixed left-0 top-16 bottom-0 w-24 bg-white border-r flex flex-col items-center py-4 gap-4 z-50 lg:hidden">
               <button
                 onClick={() => setShowLeftSidebar(false)}
-                className="absolute top-2 right-2 p-1 rounded-md hover:bg-gray-100 lg:hidden"
+                className="flex items-center justify-center absolute top-2 right-2 p-1 rounded-md hover:bg-gray-100 lg:hidden"
                 aria-label="Close sidebar"
               >
                 <MdClose className="text-xl" />
@@ -608,7 +608,7 @@ const Editor = () => {
                 <h3 className="font-medium">{t('editor.controlsSidebar.title')}</h3>
                 <button
                   onClick={() => setShowRightSidebar(false)}
-                  className="p-1 rounded-md hover:bg-gray-100"
+                  className="flex items-center justify-center p-1 rounded-md hover:bg-gray-100"
                   aria-label="Close sidebar"
                 >
                   <MdClose className="text-xl" />
@@ -644,14 +644,14 @@ const Editor = () => {
                 <div className="mt-4 space-y-2">
                   <button
                     onClick={() => bringForward(singleSelectedId)}
-                    className="w-full py-2 text-sm text-center bg-gray-100 rounded hover:bg-gray-200"
+                    className="flex items-center justify-center w-full py-2 text-sm text-center bg-gray-100 rounded hover:bg-gray-200"
                   >
                     {t('editor.controlsSidebar.layerOptions.forward')}
                   </button>
 
                   <button
                     onClick={() => sendBackward(singleSelectedId)}
-                    className="w-full py-2 text-sm text-center bg-gray-100 rounded hover:bg-gray-200"
+                    className="flex items-center justify-center w-full py-2 text-sm text-center bg-gray-100 rounded hover:bg-gray-200"
                   >
                     {t('editor.controlsSidebar.layerOptions.backward')}
                   </button>
@@ -738,14 +738,14 @@ const Editor = () => {
             <div className="mt-4 space-y-2">
               <button
                 onClick={() => bringForward(singleSelectedId)}
-                className="w-full py-2 text-sm text-center bg-gray-100 rounded hover:bg-gray-200"
+                className="flex items-center justify-center w-full py-2 text-sm text-center bg-gray-100 rounded hover:bg-gray-200"
               >
                 {t('editor.controlsSidebar.layerOptions.forward')}
               </button>
 
               <button
                 onClick={() => sendBackward(singleSelectedId)}
-                className="w-full py-2 text-sm text-center bg-gray-100 rounded hover:bg-gray-200"
+                className="flex items-center justify-center w-full py-2 text-sm text-center bg-gray-100 rounded hover:bg-gray-200"
               >
                 {t('editor.controlsSidebar.layerOptions.backward')}
               </button>
