@@ -88,7 +88,12 @@ const Editor = () => {
         const element = canvasRef.current;
       
         try {
-          // ✅ wait for background image
+          // ✅ ensure all images inside the canvas (template background + stickers) are fully loaded
+          if (typeof element.waitForImages === "function") {
+            await element.waitForImages();
+          }
+      
+          // ✅ extra safety: explicitly wait for template preview image (first time on iOS)
           if (state.previewImage) {
             await waitForImage(state.previewImage);
           }
@@ -98,7 +103,7 @@ const Editor = () => {
             await document.fonts.ready;
           }
       
-          // ✅ force iOS repaint
+          // ✅ force iOS repaint so the loaded background is actually painted before capture
           await forceIOSRepaint(element);
       
           const dataUrl = await toPng(element, {
