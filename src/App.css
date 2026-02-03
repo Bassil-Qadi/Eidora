@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+html[lang="ar"],
+html[lang="ar"] body,
+html[lang="ar"] #root {
+  font-style: normal !important;
+}
+
+html[lang="ar"] * {
+  font-style: normal !important;
+  font-synthesis: none !important;
+  -webkit-text-size-adjust: 100%;
+}
+
 
 /* English Fonts */
 
