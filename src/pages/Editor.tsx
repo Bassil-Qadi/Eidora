@@ -68,6 +68,31 @@ const Editor = () => {
         return () => window.removeEventListener("keydown", handler);
       }, []);
 
+      const preloadAndDecodeImage = async (src?: string) => {
+        if (!src) return;
+      
+        return new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+      
+          img.onload = async () => {
+            try {
+              if (img.decode) {
+                await img.decode(); // 🔥 critical for iOS
+              }
+            } catch {}
+      
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => resolve());
+            });
+          };
+      
+          img.onerror = reject;
+          img.src = src;
+        });
+      };
+      
+
       const handleDownload = async () => {
         if (!canvasRef.current) return;
       
@@ -83,6 +108,12 @@ const Editor = () => {
           if (document.fonts?.ready) {
             await document.fonts.ready;
           }
+
+          // wait for background decode (iOS fix)
+          if (state.previewImage) {
+            await preloadAndDecodeImage(state.previewImage);
+          }
+
       
           const dataUrl = await toPng(element, {
             cacheBust: false,
