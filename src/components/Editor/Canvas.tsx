@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
+import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { EditorElement, TextElement, ImageElement } from "../../types/editor";
 import { measureTextWidth } from "../../utils/measureTextWidth";
 import { useLanguage } from "../../hooks/useLanguage";
@@ -16,7 +16,6 @@ interface CanvasProps {
   onDelete: (id: string) => void;
   duplicateSelected: () => void;
   background: string;
-  previewImage?: string;
 }
 
 export interface CanvasHandle {
@@ -41,7 +40,6 @@ const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
       onDelete,
       duplicateSelected,
       background,
-      previewImage
     },
     ref
   ) => {
@@ -311,7 +309,6 @@ const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
     return (
       <div className="flex items-center justify-center w-full"
       style={{
-        WebkitTransform: "translateZ(0)",
         backfaceVisibility: "hidden",
       }}
       >
@@ -319,24 +316,11 @@ const Canvas = forwardRef<HTMLDivElement & CanvasHandle, CanvasProps>(
           ref={canvasRef}
           className="relative w-[280px] h-[450px] sm:w-[320px] sm:h-[520px] md:w-[360px] md:h-[580px]"
           style={{
-            // Use CSS background for solid/gradient colors when no template image is set
-            background: previewImage ? "transparent" : background,
+            background: background,
           }}
           onClick={() => onClearSelection()}
         >
-          {/* When a template is active, render the preview image as a real <img>
-              so html-to-image (especially on iOS Safari) reliably captures it. */}
-          {previewImage && (
-            <img
-              ref={previewImageRef}
-              src={previewImage}
-              alt="Card background"
-              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-              crossOrigin="anonymous"
-              loading="eager"
-              style={{ zIndex: 0 }}
-            />
-          )}
+          
 
           <div className="relative w-full h-full" style={{ zIndex: 1 }}>
           {elements.map((el) => {

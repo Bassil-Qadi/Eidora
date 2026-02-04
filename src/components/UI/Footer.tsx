@@ -1,4 +1,5 @@
 import { FaWhatsapp, FaInstagram, FaFacebook } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import { useLanguage } from "../../hooks/useLanguage"
 
 const Footer = () => {
@@ -24,14 +25,14 @@ const Footer = () => {
           <h3 className="font-semibold mb-3">{t("footer.quickLinks")}</h3>
           <ul className="space-y-2 text-sm">
             <li>
-              <a href="/" className="hover:text-gray-600 transition">
+              <Link to="/" className="hover:text-gray-600 transition">
                 {t("footer.home")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-gray-600 transition">
+              <Link to="/editor" className="hover:text-gray-600 transition">
                 {t("footer.createCard")}
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
