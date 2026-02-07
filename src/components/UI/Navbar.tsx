@@ -21,6 +21,7 @@ const Navbar = () => {
               {t("ramadan.title")}
             </h2>
             <small className="hidden sm:block">{t("ramadan.greeting")}</small>
+            {/* <img src="/GPT-Logo.png" alt="logo" className="w-20 h-20" /> */}
           </div>
         </div>
         <LanguageSwitcher />
