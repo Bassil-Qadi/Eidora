@@ -11,7 +11,7 @@ export default function TemplatesPanel({ templates, onSelect }: Props) {
   const { t } = useLanguage();
 
   return (
-    <div className="mt-8">
+    <div className="mt-6">
       <h3 className="text-xs sm:text-sm font-medium mb-3">{t('editor.controlsSidebar.controls.templates')}</h3>
 
       <div className="flex flex-col gap-2.5 max-h-[300px] sm:max-h-[400px] overflow-y-auto pr-1">
