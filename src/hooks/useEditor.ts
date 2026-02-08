@@ -378,6 +378,30 @@ export const useEditor = () => {
     }));
   };
 
+  const addEmojiText = (emoji: string) => {
+    const newEmoji: TextElement = {
+      id: crypto.randomUUID(),
+      type: "text",
+      text: emoji,
+      x: 50,
+      y: 50,
+      fontSize: 40,
+      color: "#000000",
+      fontFamily: "Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji",
+      align: "center",
+      bold: false,
+      italic: false,
+      underline: false,
+    };
+  
+    commitState((prev) => ({
+      ...prev,
+      elements: [...prev.elements, newEmoji],
+      selectedElementIds: [newEmoji.id],
+    }));
+  };
+  
+
   /* ---------------------------------- */
   /* Public API */
   /* ---------------------------------- */
@@ -417,6 +441,7 @@ export const useEditor = () => {
     bringForward,
     sendBackward,
     applyTemplate,
-    duplicateSelected
+    duplicateSelected,
+    addEmojiText
   };
 };
