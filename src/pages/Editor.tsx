@@ -15,15 +15,16 @@ import { TextElement } from "../types/editor";
 import { templates } from '../data/templates';
 import { DUAS } from '../data/duas';
 import { STICKERS } from '../data/stickers';
-import { MdTextFields, MdEmojiEmotions, MdImage, MdPalette, MdContentCopy, MdMenu, MdClose } from "react-icons/md";
+import { MdTextFields, MdEmojiEmotions, MdImage, MdPalette, MdContentCopy, MdMenu, MdClose, MdInsertEmoticon } from "react-icons/md";
 import { FiTrash } from "react-icons/fi";
 import UndoRedoContainer from '../components/UI/UndoRedoContainer';
+import EmojiBar from '../components/Editor/EmojiBar';
 
 const Editor = () => {
 
   const canvasRef = useRef<HTMLDivElement & CanvasHandle>(null);
   const { t } = useLanguage();
-  const { state, addText, selectElement, clearSelection, updateTextElement, moveElement, addSticker, resizeElement, rotateElement, deleteSelected, setBackground, bringForward, sendBackward, applyTemplate, addDuaText, undo, redo, duplicateSelected, canRedo, canUndo } = useEditor();
+  const { state, addText, selectElement, clearSelection, updateTextElement, moveElement, addSticker,  resizeElement, rotateElement, deleteSelected, setBackground, bringForward, sendBackward, applyTemplate, addDuaText, undo, redo, duplicateSelected, addEmojiText, canRedo, canUndo } = useEditor();
   const [showStickers, setShowStickers] = useState(false);
   const [showLeftSidebar, setShowLeftSidebar] = useState(false);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
@@ -247,9 +248,11 @@ const Editor = () => {
           <SidebarButton
             label={t('editor.optionsSidebar.addStickerBtn')}
             color="yellow"
-            icon={<MdEmojiEmotions />}
+            icon={<MdInsertEmoticon />}
             onClick={() => setShowStickers((v) => !v)}
           />
+
+          <EmojiBar onSelect={addEmojiText} />
 
           <SidebarButton
             label={t('editor.optionsSidebar.AddImageBtn')}
