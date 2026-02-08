@@ -12,10 +12,11 @@ const Footer = () => {
 
         {/* Brand */}
         <div>
-          <h2 className="text-xl font-semibold">
+          {/* <h2 className="text-xl font-semibold">
             🌙 {t("footer.title")}
-          </h2>
-          <p className="mt-3 text-sm text-gray-700">
+          </h2> */}
+          <img src="/Eidora-logo.png" alt="logo" className="w-32 object-contain" />
+          <p className="mt-4 text-sm text-gray-700">
             {t("footer.subTitle")}
           </p>
         </div>

@@ -7,22 +7,8 @@ const Navbar = () => {
   return (
     <nav className="w-full border-b border-gray-200">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
-          {!isRTL ? (
-            <AiOutlineMoon size={30} className="text-gold" />
-          ) : (
-            <div className="scale-x-[-1]">
-              <AiOutlineMoon size={30} className="text-gold" />
-            </div>
-          )}
-
-          <div>
-            <h2 className="text-2xl font-semibold text-gold mb-0">
-              {t("ramadan.title")}
-            </h2>
-            <small className="hidden sm:block">{t("ramadan.greeting")}</small>
-            {/* <img src="/GPT-Logo.png" alt="logo" className="w-20 h-20" /> */}
-          </div>
+        <div className="h-full flex items-center">
+        <img src="/Eidora-logo.png" alt="logo" className="w-32 h-32 object-contain" />
         </div>
         <LanguageSwitcher />
       </div>
