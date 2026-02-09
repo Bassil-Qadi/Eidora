@@ -1,7 +1,7 @@
 ## Project Overview (English)
 
 ### 1. Project Name and Purpose
-- **Name**: Ramadan Cards 2026  
+- **Name**: Eidora 
 - **Goal**: A web app for creating beautiful, personalized Ramadan and Eid greeting cards that you can design directly in the browser and download as an image.
 - **Target users**: Muslims and anyone who wants to share Ramadan/Eid greetings with friends and family in a modern, visual way.
 
@@ -146,7 +146,7 @@
 ## نظرة عامة على المشروع (العربية)
 
 ### 1. اسم المشروع وهدفه
-- **الاسم**: بطاقات رمضان 2026  
+- **الاسم**: إيدورا
 - **الهدف**: تطبيق ويب لإنشاء بطاقات تهنئة رمضان وعيد جميلة وشخصية يمكن تصميمها مباشرة من المتصفح ثم حفظها كصورة.
 - **المستخدمون المستهدفون**: المسلمون وكل من يرغب في مشاركة تهاني رمضان والعيد مع الأهل والأصدقاء بطريقة عصرية وجذابة.
 
